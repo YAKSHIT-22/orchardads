@@ -195,7 +195,7 @@ export const CHART = {
   axis: 'var(--ink-faint)',
 } as const;
 
-// ── Shared tool-page controls ──
+// -- Shared tool-page controls --
 // Consolidated here so every cluster view (analytics/management/creative/
 // audience/growth) reads from one implementation instead of five drifting
 // file-scoped copies.
