@@ -9,7 +9,7 @@ const SECTIONS: [string, string][] = [
   ['Availability', 'The service is provided on an "as is" basis. We aim for high availability but do not guarantee uninterrupted service.'],
   ['Limitation of liability', 'To the maximum extent permitted by law, OrchardAds is not liable for indirect or consequential damages, or for ad spend outcomes resulting from changes you approve.'],
   ['Termination', 'You may stop using the service and disconnect platforms at any time. We may suspend accounts that violate these terms.'],
-  ['Contact', 'hello@adsos.app.'],
+  ['Contact', 'support@orchardads.in.'],
 ];
 
 export default function TermsPage() {

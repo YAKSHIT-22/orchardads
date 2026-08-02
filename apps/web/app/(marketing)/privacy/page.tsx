@@ -8,7 +8,7 @@ const SECTIONS: [string, string][] = [
   ['Platform data', 'Data accessed through the TikTok Marketing API is used only to operate features for your own connected accounts, in line with TikTok\'s developer terms. We do not use it to train models without consent and do not resell it.'],
   ['Retention and deletion', 'You can disconnect a platform or request deletion of your workspace data at any time; on request we delete your data within 30 days, except where retention is legally required.'],
   ['Security', 'Encryption in transit and at rest, strict tenant isolation (row-level security), role-based access, an immutable audit trail, and least-privilege access to platform APIs.'],
-  ['Contact', 'Questions about this policy: hello@adsos.app.'],
+  ['Contact', 'Questions about this policy: support@orchardads.in.'],
 ];
 
 export default function PrivacyPage() {

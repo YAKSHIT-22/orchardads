@@ -1,8 +1,32 @@
 import type { NextConfig } from 'next';
 
+// Content Security Policy (adapted from handyAds). Next injects inline styles/JSON
+// so 'unsafe-inline' stays; fonts come from next/font (self-hosted) so no Google
+// font hosts are needed. connect-src allows the TikTok Business API + same-origin.
+const ContentSecurityPolicy = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  style-src 'self' 'unsafe-inline';
+  font-src 'self' data:;
+  img-src 'self' data: https:;
+  connect-src 'self' https://business-api.tiktok.com https:;
+  frame-ancestors 'none';
+  base-uri 'self';
+  form-action 'self';
+`.replace(/\n/g, '');
+
+const securityHeaders = [
+  { key: 'Content-Security-Policy', value: ContentSecurityPolicy },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  // Workspace packages ship TypeScript source; let Next compile them.
+  poweredByHeader: false,
   transpilePackages: [
     '@adsos/ai',
     '@adsos/automation',
@@ -16,8 +40,12 @@ const nextConfig: NextConfig = {
     '@adsos/ui',
   ],
   experimental: {
-    // Server actions origin check (CSRF) - set real domains in prod.
-    serverActions: { allowedOrigins: ['localhost:3000', '127.0.0.1:3000'] },
+    serverActions: {
+      allowedOrigins: ['localhost:3000', '127.0.0.1:3000', 'www.orchardads.in', 'orchardads.in'],
+    },
+  },
+  async headers() {
+    return [{ source: '/(.*)', headers: securityHeaders }];
   },
 };
 

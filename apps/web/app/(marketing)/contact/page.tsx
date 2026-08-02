@@ -16,8 +16,8 @@ export default function ContactPage() {
         </p>
         <div className="flex items-center gap-2 text-ink-muted">
           <Mail className="h-4 w-4" />
-          <a href="mailto:hello@adsos.app" className="font-ui text-[13px] hover:text-ink">
-            hello@adsos.app
+          <a href="mailto:support@orchardads.in" className="font-ui text-[13px] hover:text-ink">
+            support@orchardads.in
           </a>
         </div>
       </div>

@@ -16,61 +16,43 @@ type Tier = {
   featured?: boolean;
 };
 
-// Simple, account-based pricing. One flat fee, all four platforms, no percentage
-// skim of your spend. Annual billing saves ~30% (billed yearly).
+// Simple, account-based pricing for TikTok Ads. One flat fee per account tier,
+// never a percentage skim of your spend. Annual billing saves ~30%.
 const TIERS: Tier[] = [
   {
     name: 'Free',
     monthly: 0,
-    accounts: '1 account',
+    accounts: '1 TikTok ad account',
     blurb: 'Audit one account and watch the engine work.',
-    features: ['All 4 platforms', 'Recommendation Inbox (read)', 'Tracking Doctor', 'Community support'],
+    features: ['Recommendation Inbox (read)', 'Tracking Doctor', 'Diagnostics + reporting', 'Community support'],
     cta: 'Start free',
     href: '/onboarding',
   },
   {
-    name: 'Starter',
-    monthly: 49,
-    accounts: '5 accounts',
-    blurb: 'A solo buyer running a handful of accounts.',
-    features: ['Everything in Free', 'One-click apply', 'Change history', 'Email support'],
-    cta: 'Start free trial',
-    href: '/onboarding',
-  },
-  {
-    name: 'Growth',
-    monthly: 149,
-    accounts: '15 accounts',
-    blurb: 'Automation and AI for a growing in-house team.',
-    features: ['Everything in Starter', 'Automation rules', 'AI analyst (Ask)', 'Experiments', 'Profitability / P&L'],
+    name: 'Pro',
+    monthly: 50,
+    accounts: '10 TikTok ad accounts',
+    blurb: 'For an in-house team running TikTok performance.',
+    features: ['Everything in Free', 'One-click apply + rollback', 'Automation rules', 'AI analyst (Ask)', 'Creator discovery + Spark Ads', 'Email support'],
     cta: 'Start free trial',
     href: '/onboarding',
     featured: true,
   },
   {
-    name: 'Agency',
-    monthly: 399,
-    accounts: '50 accounts',
-    blurb: 'Multi-client operations with approvals and white-label.',
-    features: ['Everything in Growth', 'Teams + roles', 'Approval workflows', 'White-label reports', 'All-accounts dashboard'],
-    cta: 'Start free trial',
-    href: '/onboarding',
-  },
-  {
-    name: 'Scale',
-    monthly: 799,
-    accounts: '150 accounts',
-    blurb: 'High-volume agencies that need export and API.',
-    features: ['Everything in Agency', 'Advanced automation', 'API + MCP access', 'Data export', 'Priority support'],
+    name: 'Pro Max',
+    monthly: 100,
+    accounts: '50 TikTok ad accounts',
+    blurb: 'For agencies managing many clients.',
+    features: ['Everything in Pro', 'Teams + roles + approvals', 'White-label reports', 'All-accounts dashboard', 'API + MCP access', 'Priority support'],
     cta: 'Start free trial',
     href: '/onboarding',
   },
   {
     name: 'Enterprise',
     monthly: null,
-    accounts: 'Custom limits',
+    accounts: 'Unlimited accounts',
     blurb: 'SSO, SLA and warehouse exports.',
-    features: ['Everything in Scale', 'SSO / SAML', 'SLA', 'Warehouse exports', 'Dedicated support'],
+    features: ['Everything in Pro Max', 'SSO / SAML', 'SLA', 'Warehouse exports', 'Dedicated support'],
     cta: 'Talk to us',
     href: '/contact',
   },
@@ -107,7 +89,7 @@ export function PricingTable() {
         <span className="rounded-sm bg-applied-wash px-1.5 py-0.5 text-label text-applied">Save 30%</span>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {TIERS.map((t) => (
           <div
             key={t.name}
@@ -143,8 +125,8 @@ export function PricingTable() {
         ))}
       </div>
       <p className="text-center font-ui text-[12px] text-ink-faint">
-        14-day free trial, no card. Every tier includes all four platforms. Extra accounts $5/mo each.
-        No percentage of your ad spend, ever.
+        14-day free trial, no card required. Start free on one account, upgrade any time. No
+        percentage of your ad spend, ever.
       </p>
     </div>
   );

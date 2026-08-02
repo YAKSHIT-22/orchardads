@@ -1,14 +1,16 @@
 import type { Metadata } from 'next';
-import { Bricolage_Grotesque, IBM_Plex_Mono, Public_Sans } from 'next/font/google';
+import { IBM_Plex_Mono, Space_Grotesk, Urbanist } from 'next/font/google';
 import './globals.css';
 
-const bricolage = Bricolage_Grotesque({
+// Display face (headings) - handyAds uses Space Grotesk.
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-bricolage-src',
 });
 
-const publicSans = Public_Sans({
+// UI / body face - handyAds uses Urbanist.
+const urbanist = Urbanist({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-public-sans-src',
@@ -22,14 +24,21 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'OrchardAds - Emerging Ads Optimization OS',
+  title: 'OrchardAds - TikTok Ads Optimization OS',
   description:
-    'One AI media-buyer workspace for TikTok Ads: diagnostics, recommendations, safe one-click actions, and rollback.',
+    'One AI media-buyer workspace for TikTok Ads: diagnostics, recommendations, safe one-click actions, creator discovery and Spark Ads.',
+  icons: {
+    icon: [
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${publicSans.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${urbanist.variable} ${plexMono.variable}`}>
       <body>{children}</body>
     </html>
   );
