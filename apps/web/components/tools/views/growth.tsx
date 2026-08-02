@@ -19,6 +19,8 @@ import {
   ContextLine,
   Checkbox,
   BulkActionBar,
+  ToolStats,
+  ToolDataTable,
 } from '@adsos/ui';
 import {
   ArrowRight,
@@ -52,7 +54,7 @@ const SPARK_LOOP_STAGES = [
   { key: 'comments', label: 'Manage comments', icon: MessagesSquare, sub: 'Moderate and reply on the live ad' },
 ] as const;
 
-function CreatorToSparkView({ tool }: ToolViewProps) {
+function CreatorToSparkView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -62,6 +64,18 @@ function CreatorToSparkView({ tool }: ToolViewProps) {
         Ads Management, Reporting and Ad Comments.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={UserSearch} label="Creators in pipeline" value="-" sub="across all stages" />
         <StatTile icon={Video} label="Spark Ads live" value="-" sub="promoted from creator posts" tone="iris" />
@@ -110,6 +124,8 @@ function CreatorToSparkView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Waypoints} tone="info">
         Creator-to-Spark Loop is the wedge combination tool: discovery, Spark Ad promotion, performance
@@ -121,7 +137,7 @@ function CreatorToSparkView({ tool }: ToolViewProps) {
 
 /* -- creator-discovery -- */
 
-function CreatorDiscoveryView({ tool }: ToolViewProps) {
+function CreatorDiscoveryView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -130,6 +146,18 @@ function CreatorDiscoveryView({ tool }: ToolViewProps) {
         the brief - not just the biggest follower count.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={UserSearch} label="Creators matched" value="-" sub="for the current filters" />
         <StatTile icon={Users} label="Avg followers" value="-" sub="across matches" />
@@ -172,6 +200,8 @@ function CreatorDiscoveryView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={UserSearch} tone="info">
         Creator Discovery searches the Creator Marketplace on the fields that predict fit - niche,
@@ -186,7 +216,7 @@ function CreatorDiscoveryView({ tool }: ToolViewProps) {
 
 const CRM_STAGES = ['Sourced', 'Contacted', 'Negotiating', 'Active', 'Completed'] as const;
 
-function CreatorCrmView({ tool }: ToolViewProps) {
+function CreatorCrmView({ tool, data }: ToolViewProps) {
   const [stage, setStage] = React.useState<(typeof CRM_STAGES)[number]>('Sourced');
   void tool;
   return (
@@ -196,6 +226,18 @@ function CreatorCrmView({ tool }: ToolViewProps) {
         from Creator Discovery goes cold.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Users} label="Total creators" value="-" sub="in the pipeline" />
         <StatTile icon={Handshake} label="Active collaborations" value="-" sub="in progress" tone="iris" />
@@ -227,6 +269,8 @@ function CreatorCrmView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Handshake} tone="info">
         Creator CRM tracks every relationship from first contact to completed campaign, so status, briefs
@@ -240,7 +284,7 @@ function CreatorCrmView({ tool }: ToolViewProps) {
 
 const COMMENT_TABS = ['All', 'Flagged', 'Needs reply', 'Hidden'] as const;
 
-function CommentManagerView({ tool }: ToolViewProps) {
+function CommentManagerView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof COMMENT_TABS)[number]>('All');
   const [selected, setSelected] = React.useState<Set<string>>(new Set());
   void tool;
@@ -250,6 +294,18 @@ function CommentManagerView({ tool }: ToolViewProps) {
         Comments across every live ad, ranked so brand-risk and unanswered questions surface first.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={MessagesSquare} label="Comments (24h)" value="-" sub="across live ads" />
         <StatTile icon={ShieldAlert} label="Flagged" value="-" sub="brand-safety risk" tone="risk" />
@@ -307,6 +363,8 @@ function CommentManagerView({ tool }: ToolViewProps) {
           }
         />
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={MessagesSquare} tone="info">
         Comment Manager moderates and prioritizes comments across every live ad - flagged for brand safety
@@ -318,7 +376,7 @@ function CommentManagerView({ tool }: ToolViewProps) {
 
 /* -- business-recommendation -- */
 
-function BusinessRecommendationView({ tool }: ToolViewProps) {
+function BusinessRecommendationView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -327,6 +385,18 @@ function BusinessRecommendationView({ tool }: ToolViewProps) {
         every suggestion holds up once validated.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Sparkles} label="Suggestions from TikTok" value="-" sub="open right now" />
         <StatTile icon={Sparkles} label="Validated" value="-" sub="hold up against your data" tone="positive" />
@@ -354,6 +424,8 @@ function BusinessRecommendationView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Sparkles} tone="info">
         TikTok surfaces suggestions from its own models; this tool re-checks each one against your account's
@@ -368,7 +440,7 @@ function BusinessRecommendationView({ tool }: ToolViewProps) {
 
 const INTEL_TABS = ['Performance benchmarks', 'Creative research'] as const;
 
-function CompetitiveIntelView({ tool }: ToolViewProps) {
+function CompetitiveIntelView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof INTEL_TABS)[number]>('Performance benchmarks');
   void tool;
   return (
@@ -378,6 +450,18 @@ function CompetitiveIntelView({ tool }: ToolViewProps) {
         only, never resold or attributed to a competitor account.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Radar} label="Benchmarks tracked" value="-" sub="metrics vs. category" />
         <StatTile icon={BarChart3} label="Category avg CTR" value="-" sub="your vertical" />
@@ -407,6 +491,8 @@ function CompetitiveIntelView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Radar} tone="info">
         Competitive Intelligence is research only: aggregate category benchmarks and public creative trends,
@@ -418,7 +504,7 @@ function CompetitiveIntelView({ tool }: ToolViewProps) {
 
 /* -- api-mcp -- */
 
-function ApiMcpView({ tool }: ToolViewProps) {
+function ApiMcpView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -427,6 +513,18 @@ function ApiMcpView({ tool }: ToolViewProps) {
         for agent-native tools.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Key} label="API keys active" value="-" sub="scoped credentials" />
         <StatTile icon={Blocks} label="MCP connections" value="-" sub="agent clients linked" tone="iris" />
@@ -463,6 +561,8 @@ function ApiMcpView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Blocks} tone="info">
         API + MCP exposes the same normalized data model the console uses, so an external BI tool or an
@@ -476,7 +576,7 @@ function ApiMcpView({ tool }: ToolViewProps) {
 
 const SHOP_TABS = ['All', 'Live', 'Out of stock'] as const;
 
-function ShopManagerView({ tool }: ToolViewProps) {
+function ShopManagerView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof SHOP_TABS)[number]>('All');
   void tool;
   return (
@@ -486,6 +586,18 @@ function ShopManagerView({ tool }: ToolViewProps) {
         groups drive traffic to each listing.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={ShoppingBag} label="Products live" value="-" sub="on the store surface" />
         <StatTile icon={Store} label="Store status" value="-" sub="onsite commerce" tone="iris" />
@@ -520,6 +632,8 @@ function ShopManagerView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={ShoppingBag} tone="info">
         Shop &amp; Commerce keeps the products your ads drive traffic to in view - inventory, price and
@@ -531,7 +645,7 @@ function ShopManagerView({ tool }: ToolViewProps) {
 
 /* -- brand-safety -- */
 
-function BrandSafetyView({ tool }: ToolViewProps) {
+function BrandSafetyView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -540,6 +654,18 @@ function BrandSafetyView({ tool }: ToolViewProps) {
         group level.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={ShieldAlert} label="Filters active" value="-" sub="applied across the account" />
         <StatTile icon={Blocks} label="Blocked categories" value="-" sub="inventory excluded" tone="risk" />
@@ -566,6 +692,8 @@ function BrandSafetyView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={ShieldAlert} tone="info">
         Brand Safety keeps delivery off flagged inventory before spend hits it, rather than reporting on

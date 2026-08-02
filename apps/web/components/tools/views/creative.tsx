@@ -19,6 +19,8 @@ import {
   ContextLine,
   Checkbox,
   BulkActionBar,
+  ToolStats,
+  ToolDataTable,
 } from '@adsos/ui';
 import {
   Ban,
@@ -40,7 +42,7 @@ import type { ToolViewMap, ToolViewProps } from './_registry';
 
 const FATIGUE_TABS = ['All', 'Fatigued', 'Healthy', 'New'] as const;
 
-function CreativeFatigueView({ tool }: ToolViewProps) {
+function CreativeFatigueView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof FATIGUE_TABS)[number]>('All');
   const [selected, setSelected] = React.useState<Set<string>>(new Set());
   void tool;
@@ -51,6 +53,18 @@ function CreativeFatigueView({ tool }: ToolViewProps) {
         flagged before the decline shows up in CPA.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Video} label="Creatives tracked" value="-" sub="active last 30 days" />
         <StatTile icon={Flame} label="Fatigued" value="-" sub="CTR decay flagged" tone="attention" />
@@ -111,6 +125,8 @@ function CreativeFatigueView({ tool }: ToolViewProps) {
           }
         />
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={ScanSearch} tone="info">
         Creative Fatigue watches CTR decay against frequency and days live for every video creative in the
@@ -123,7 +139,7 @@ function CreativeFatigueView({ tool }: ToolViewProps) {
 
 /* -- creative-agent -- */
 
-function CreativeAgentView({ tool }: ToolViewProps) {
+function CreativeAgentView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -132,6 +148,18 @@ function CreativeAgentView({ tool }: ToolViewProps) {
         drafts a creative brief from what is actually working.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Video} label="Top videos analyzed" value="-" sub="top decile by CTR" />
         <StatTile icon={Sparkles} label="Winning patterns" value="-" sub="shared across top videos" tone="iris" />
@@ -190,6 +218,8 @@ function CreativeAgentView({ tool }: ToolViewProps) {
           </CardContent>
         </Card>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Sparkles} tone="info">
         Creative Intelligence Agent reads your top decile of video creatives, finds what they share, and
@@ -203,7 +233,7 @@ function CreativeAgentView({ tool }: ToolViewProps) {
 
 const REFRESH_STAGES = ['Fatigue queue', 'Creator sourcing', 'Variant launch'] as const;
 
-function CreativeRefreshView({ tool }: ToolViewProps) {
+function CreativeRefreshView({ tool, data }: ToolViewProps) {
   const [stage, setStage] = React.useState<(typeof REFRESH_STAGES)[number]>('Fatigue queue');
   void tool;
   return (
@@ -214,6 +244,18 @@ function CreativeRefreshView({ tool }: ToolViewProps) {
         signals, the Creator Marketplace and Ads Management.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Flame} label="Fatigued creatives" value="-" sub="need replacement" tone="attention" />
         <StatTile icon={UserSearch} label="Creators sourced" value="-" sub="matched to fatigued slots" />
@@ -286,6 +328,8 @@ function CreativeRefreshView({ tool }: ToolViewProps) {
           </DataGrid>
         )}
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Layers} tone="info">
         Creative Refresh Engine is a combination tool: it reads fatigue signals, sources replacement content
@@ -300,7 +344,7 @@ function CreativeRefreshView({ tool }: ToolViewProps) {
 
 const SPARK_TABS = ['All', 'Authorized', 'Promoted'] as const;
 
-function SparkAdsView({ tool }: ToolViewProps) {
+function SparkAdsView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof SPARK_TABS)[number]>('All');
   void tool;
   return (
@@ -310,6 +354,18 @@ function SparkAdsView({ tool }: ToolViewProps) {
         and track it end to end.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Clapperboard} label="Eligible posts" value="-" sub="from linked accounts" />
         <StatTile icon={FileText} label="Authorized" value="-" sub="video code granted" />
@@ -348,6 +404,8 @@ function SparkAdsView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Clapperboard} tone="info">
         Spark Ads Manager keeps organic reach and paid reach on the same post: authorize once, promote as a

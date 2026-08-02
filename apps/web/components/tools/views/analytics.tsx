@@ -25,6 +25,8 @@ import {
   BulkActionBar,
   TrendChart,
   Button,
+  ToolStats,
+  ToolDataTable,
   type DateRangeValue,
 } from '@adsos/ui';
 import {
@@ -137,7 +139,7 @@ const NO_DATA = 'Connect a TikTok ad account to see live results here.';
 
 // -- Diagnostics ------------------------------------------------------------
 
-function DeliveryDoctorView({ tool }: ToolViewProps) {
+function DeliveryDoctorView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [reason, setReason] = useState<'all' | 'learning' | 'bid' | 'audience' | 'budget'>('all');
   return (
@@ -147,14 +149,18 @@ function DeliveryDoctorView({ tool }: ToolViewProps) {
         phase, bid competitiveness, and audience size - then pairs each reason with a proposed fix.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: ScanSearch, label: 'Ad groups diagnosed', sub: `last ${range}` },
-          { icon: Clock, label: 'Stuck in learning' },
-          { icon: DollarSign, label: 'Bid-constrained' },
-          { icon: Users, label: 'Audience-constrained' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: ScanSearch, label: 'Ad groups diagnosed', sub: `last ${range}` },
+            { icon: Clock, label: 'Stuck in learning' },
+            { icon: DollarSign, label: 'Bid-constrained' },
+            { icon: Users, label: 'Audience-constrained' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
         <Segmented
@@ -170,20 +176,31 @@ function DeliveryDoctorView({ tool }: ToolViewProps) {
           ]}
         />
       </div>
-      <ToolTable
-        columns={[
-          { label: 'Ad group' },
-          { label: 'Campaign' },
-          { label: 'Delivery status' },
-          { label: 'Learning phase' },
-          { label: 'Diagnosis reason' },
-          { label: 'Spend', numeric: true },
-          { label: 'CPA', numeric: true },
-          { label: 'Impressions', numeric: true },
-          { label: 'Suggested fix' },
-        ]}
-        emptyMessage="Connect a TikTok ad account to run diagnosis. Ad Diagnosis needs at least 3 days of ad group delivery data."
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Ad group' },
+            { label: 'Campaign' },
+            { label: 'Delivery status' },
+            { label: 'Learning phase' },
+            { label: 'Diagnosis reason' },
+            { label: 'Spend', numeric: true },
+            { label: 'CPA', numeric: true },
+            { label: 'Impressions', numeric: true },
+            { label: 'Suggested fix' },
+          ]}
+          emptyMessage="Connect a TikTok ad account to run diagnosis. Ad Diagnosis needs at least 3 days of ad group delivery data."
+        />
+      )}
       <InsightBanner icon={ScanSearch} tone="info">
         Delivery Doctor pulls TikTok&apos;s Ad Diagnosis reason for every non-delivering or
         under-delivering ad group and pairs it with your reporting data, so you see the why -
@@ -193,7 +210,7 @@ function DeliveryDoctorView({ tool }: ToolViewProps) {
   );
 }
 
-function HealthScoreView({ tool }: ToolViewProps) {
+function HealthScoreView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
@@ -202,27 +219,42 @@ function HealthScoreView({ tool }: ToolViewProps) {
         every connected ad account, so you know where to look first.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: Activity, label: 'Overall health score', sub: `last ${range}` },
-          { icon: Gauge, label: 'Delivery health' },
-          { icon: CheckCircle2, label: 'Tracking health' },
-          { icon: Layers, label: 'Structure health' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: Activity, label: 'Overall health score', sub: `last ${range}` },
+            { icon: Gauge, label: 'Delivery health' },
+            { icon: CheckCircle2, label: 'Tracking health' },
+            { icon: Layers, label: 'Structure health' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
-      <ToolTable
-        columns={[
-          { label: 'Component' },
-          { label: 'Score', numeric: true },
-          { label: 'Status' },
-          { label: 'Signal' },
-          { label: 'Trend', numeric: true },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Component' },
+            { label: 'Score', numeric: true },
+            { label: 'Status' },
+            { label: 'Signal' },
+            { label: 'Trend', numeric: true },
+          ]}
+          emptyMessage={NO_DATA}
+        />
+      )}
       <InsightBanner icon={Activity} tone="info">
         Account Health Score rolls delivery, tracking and structure into one number, then breaks it
         back down by component so a dropping score always points at a specific, fixable cause.
@@ -231,7 +263,7 @@ function HealthScoreView({ tool }: ToolViewProps) {
   );
 }
 
-function BudgetPacingView({ tool }: ToolViewProps) {
+function BudgetPacingView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
@@ -240,37 +272,54 @@ function BudgetPacingView({ tool }: ToolViewProps) {
         end-of-period total, so pacing drift shows up before the budget runs out early - or under-spends.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: Wallet, label: 'Spend to date' },
-          { icon: Gauge, label: 'Ideal pace' },
-          { icon: TrendingUp, label: 'Projected EOP spend' },
-          { icon: AlertTriangle, label: 'Pacing variance' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: Wallet, label: 'Spend to date' },
+            { icon: Gauge, label: 'Ideal pace' },
+            { icon: TrendingUp, label: 'Projected EOP spend' },
+            { icon: AlertTriangle, label: 'Pacing variance' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
-      <TrendChart
-        xKey="day"
-        series={[
-          { key: 'actual', label: 'Actual spend' },
-          { key: 'ideal', label: 'Ideal pace' },
-        ]}
-        emptyLabel="Pacing curve renders once daily spend has synced for the selected range"
-      />
-      <ToolTable
-        columns={[
-          { label: 'Campaign' },
-          { label: 'Daily budget', numeric: true },
-          { label: 'Spend to date', numeric: true },
-          { label: 'Ideal pace', numeric: true },
-          { label: 'Actual pace', numeric: true },
-          { label: 'Projected EOP', numeric: true },
-          { label: 'Status' },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
+          <TrendChart
+            xKey="day"
+            series={[
+              { key: 'actual', label: 'Actual spend' },
+              { key: 'ideal', label: 'Ideal pace' },
+            ]}
+            emptyLabel="Pacing curve renders once daily spend has synced for the selected range"
+          />
+          <ToolTable
+            columns={[
+              { label: 'Campaign' },
+              { label: 'Daily budget', numeric: true },
+              { label: 'Spend to date', numeric: true },
+              { label: 'Ideal pace', numeric: true },
+              { label: 'Actual pace', numeric: true },
+              { label: 'Projected EOP', numeric: true },
+              { label: 'Status' },
+            ]}
+            emptyMessage={NO_DATA}
+          />
+        </>
+      )}
       <InsightBanner icon={Gauge} tone="info">
         Budget Pacing projects every campaign to period end using its trailing daily spend rate, so
         you can catch a budget that will cap out on day 20 - or finish 40% under - while there is
@@ -280,7 +329,7 @@ function BudgetPacingView({ tool }: ToolViewProps) {
   );
 }
 
-function AnomalyInvestigatorView({ tool }: ToolViewProps) {
+function AnomalyInvestigatorView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [metric, setMetric] = useState<'all' | 'spend' | 'cpa' | 'ctr' | 'cvr'>('all');
   return (
@@ -290,14 +339,18 @@ function AnomalyInvestigatorView({ tool }: ToolViewProps) {
         severity, with the entity and time window that drove each one.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: AlertTriangle, label: 'Anomalies detected', sub: `last ${range}` },
-          { icon: Zap, label: 'Highest severity' },
-          { icon: DollarSign, label: 'Spend impacted' },
-          { icon: BarChart3, label: 'Metrics affected' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: AlertTriangle, label: 'Anomalies detected', sub: `last ${range}` },
+            { icon: Zap, label: 'Highest severity' },
+            { icon: DollarSign, label: 'Spend impacted' },
+            { icon: BarChart3, label: 'Metrics affected' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
         <Segmented
@@ -313,26 +366,39 @@ function AnomalyInvestigatorView({ tool }: ToolViewProps) {
           ]}
         />
       </div>
-      <TrendChart
-        xKey="day"
-        series={[
-          { key: 'actual', label: 'Actual' },
-          { key: 'baseline', label: 'Trailing baseline' },
-        ]}
-        emptyLabel="Baseline vs. actual renders once a trailing window has synced"
-      />
-      <ToolTable
-        columns={[
-          { label: 'Entity' },
-          { label: 'Metric' },
-          { label: 'Baseline', numeric: true },
-          { label: 'Actual', numeric: true },
-          { label: 'Deviation', numeric: true },
-          { label: 'Severity' },
-          { label: 'Detected at' },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
+          <TrendChart
+            xKey="day"
+            series={[
+              { key: 'actual', label: 'Actual' },
+              { key: 'baseline', label: 'Trailing baseline' },
+            ]}
+            emptyLabel="Baseline vs. actual renders once a trailing window has synced"
+          />
+          <ToolTable
+            columns={[
+              { label: 'Entity' },
+              { label: 'Metric' },
+              { label: 'Baseline', numeric: true },
+              { label: 'Actual', numeric: true },
+              { label: 'Deviation', numeric: true },
+              { label: 'Severity' },
+              { label: 'Detected at' },
+            ]}
+            emptyMessage={NO_DATA}
+          />
+        </>
+      )}
       <InsightBanner icon={AlertTriangle} tone="info">
         Anomaly Investigator compares each entity&apos;s metric against its own trailing baseline,
         not a fixed threshold, so a small account and a large one both get anomalies sized to what
@@ -342,7 +408,7 @@ function AnomalyInvestigatorView({ tool }: ToolViewProps) {
   );
 }
 
-function PerformanceChangeView({ tool }: ToolViewProps) {
+function PerformanceChangeView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
@@ -351,36 +417,53 @@ function PerformanceChangeView({ tool }: ToolViewProps) {
         ad that drove it - so a swing in the account total always traces to a cause.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: DollarSign, label: 'Spend change' },
-          { icon: TrendingDown, label: 'CPA change' },
-          { icon: TrendingUp, label: 'Conversions change' },
-          { icon: LineChart, label: 'ROAS change' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: DollarSign, label: 'Spend change' },
+            { icon: TrendingDown, label: 'CPA change' },
+            { icon: TrendingUp, label: 'Conversions change' },
+            { icon: LineChart, label: 'ROAS change' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
-      <TrendChart
-        xKey="day"
-        series={[
-          { key: 'current', label: 'Current period' },
-          { key: 'prior', label: 'Prior period' },
-        ]}
-        emptyLabel="Period-over-period trend renders once two full periods have synced"
-      />
-      <ToolTable
-        columns={[
-          { label: 'Entity' },
-          { label: 'Metric' },
-          { label: 'Prior period', numeric: true },
-          { label: 'Current period', numeric: true },
-          { label: 'Change', numeric: true },
-          { label: 'Primary driver' },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
+          <TrendChart
+            xKey="day"
+            series={[
+              { key: 'current', label: 'Current period' },
+              { key: 'prior', label: 'Prior period' },
+            ]}
+            emptyLabel="Period-over-period trend renders once two full periods have synced"
+          />
+          <ToolTable
+            columns={[
+              { label: 'Entity' },
+              { label: 'Metric' },
+              { label: 'Prior period', numeric: true },
+              { label: 'Current period', numeric: true },
+              { label: 'Change', numeric: true },
+              { label: 'Primary driver' },
+            ]}
+            emptyMessage={NO_DATA}
+          />
+        </>
+      )}
       <InsightBanner icon={LineChart} tone="info">
         Performance Change compares the selected period against the prior one of equal length and
         ranks entities by contribution to the move, so the top row is always the biggest reason the
@@ -390,7 +473,7 @@ function PerformanceChangeView({ tool }: ToolViewProps) {
   );
 }
 
-function ChangeHistoryView({ tool }: ToolViewProps) {
+function ChangeHistoryView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [type, setType] = useState<'all' | 'budget' | 'bid' | 'targeting' | 'status'>('all');
   return (
@@ -400,14 +483,18 @@ function ChangeHistoryView({ tool }: ToolViewProps) {
         correlated with the performance shift that followed it.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: History, label: 'Changes logged', sub: `last ${range}` },
-          { icon: GitCompareArrows, label: 'Tied to a shift' },
-          { icon: Wallet, label: 'Budget changes' },
-          { icon: Target, label: 'Targeting changes' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: History, label: 'Changes logged', sub: `last ${range}` },
+            { icon: GitCompareArrows, label: 'Tied to a shift' },
+            { icon: Wallet, label: 'Budget changes' },
+            { icon: Target, label: 'Targeting changes' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
         <Segmented
@@ -423,18 +510,29 @@ function ChangeHistoryView({ tool }: ToolViewProps) {
           ]}
         />
       </div>
-      <ToolTable
-        columns={[
-          { label: 'Timestamp' },
-          { label: 'Entity' },
-          { label: 'Field' },
-          { label: 'From' },
-          { label: 'To' },
-          { label: 'Actor' },
-          { label: 'Performance impact' },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Timestamp' },
+            { label: 'Entity' },
+            { label: 'Field' },
+            { label: 'From' },
+            { label: 'To' },
+            { label: 'Actor' },
+            { label: 'Performance impact' },
+          ]}
+          emptyMessage={NO_DATA}
+        />
+      )}
       <InsightBanner icon={CalendarClock} tone="info">
         Change History lines every field change up against the metric trend around it, so you can
         tell whether last Tuesday&apos;s bid edit actually caused the CPA jump - or was a coincidence.
@@ -452,7 +550,7 @@ const SENSITIVITY_OPTIONS: { value: Sensitivity; label: string }[] = [
   { value: 'aggressive', label: 'Aggressive' },
 ];
 
-function WasteFinderView({ tool }: ToolViewProps) {
+function WasteFinderView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [sensitivity, setSensitivity] = useState<Sensitivity>('balanced');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -463,31 +561,46 @@ function WasteFinderView({ tool }: ToolViewProps) {
         impressions - ranked by how confidently each one looks like waste.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: Recycle, label: 'Wasted spend', sub: `last ${range}` },
-          { icon: DollarSign, label: 'Zero-conversion ad groups' },
-          { icon: Target, label: 'Dead targets' },
-          { icon: BarChart3, label: 'Wasted impressions' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: Recycle, label: 'Wasted spend', sub: `last ${range}` },
+            { icon: DollarSign, label: 'Zero-conversion ad groups' },
+            { icon: Target, label: 'Dead targets' },
+            { icon: BarChart3, label: 'Wasted impressions' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
         <Segmented ariaLabel="Sensitivity" value={sensitivity} onChange={setSensitivity} options={SENSITIVITY_OPTIONS} />
       </div>
-      <SelectableToolTable
-        columns={[
-          { label: 'Ad group' },
-          { label: 'Campaign' },
-          { label: 'Spend', numeric: true },
-          { label: 'Impressions', numeric: true },
-          { label: 'Conversions', numeric: true },
-          { label: 'CPA', numeric: true },
-          { label: 'Reason' },
-          { label: 'Confidence' },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <SelectableToolTable
+          columns={[
+            { label: 'Ad group' },
+            { label: 'Campaign' },
+            { label: 'Spend', numeric: true },
+            { label: 'Impressions', numeric: true },
+            { label: 'Conversions', numeric: true },
+            { label: 'CPA', numeric: true },
+            { label: 'Reason' },
+            { label: 'Confidence' },
+          ]}
+          emptyMessage={NO_DATA}
+        />
+      )}
       <BulkActionBar
         count={selected.size}
         onClear={() => setSelected(new Set())}
@@ -512,7 +625,7 @@ function WasteFinderView({ tool }: ToolViewProps) {
   );
 }
 
-function UnderfundedWinnerView({ tool }: ToolViewProps) {
+function UnderfundedWinnerView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   return (
@@ -522,29 +635,44 @@ function UnderfundedWinnerView({ tool }: ToolViewProps) {
         budget - the opposite problem to waste.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: TrendingUp, label: 'Underfunded winners', sub: `last ${range}` },
-          { icon: Clock, label: 'Avg budget-capped days' },
-          { icon: DollarSign, label: 'Avg CPA of winners' },
-          { icon: Wallet, label: 'Extra budget suggested' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: TrendingUp, label: 'Underfunded winners', sub: `last ${range}` },
+            { icon: Clock, label: 'Avg budget-capped days' },
+            { icon: DollarSign, label: 'Avg CPA of winners' },
+            { icon: Wallet, label: 'Extra budget suggested' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
-      <SelectableToolTable
-        columns={[
-          { label: 'Ad group' },
-          { label: 'Campaign' },
-          { label: 'CPA', numeric: true },
-          { label: 'ROAS', numeric: true },
-          { label: 'Budget-capped days', numeric: true },
-          { label: 'Current budget', numeric: true },
-          { label: 'Suggested budget', numeric: true },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <SelectableToolTable
+          columns={[
+            { label: 'Ad group' },
+            { label: 'Campaign' },
+            { label: 'CPA', numeric: true },
+            { label: 'ROAS', numeric: true },
+            { label: 'Budget-capped days', numeric: true },
+            { label: 'Current budget', numeric: true },
+            { label: 'Suggested budget', numeric: true },
+          ]}
+          emptyMessage={NO_DATA}
+        />
+      )}
       <BulkActionBar
         count={selected.size}
         onClear={() => setSelected(new Set())}
@@ -564,7 +692,7 @@ function UnderfundedWinnerView({ tool }: ToolViewProps) {
   );
 }
 
-function OverspendingLoserView({ tool }: ToolViewProps) {
+function OverspendingLoserView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [sensitivity, setSensitivity] = useState<Sensitivity>('balanced');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -575,30 +703,45 @@ function OverspendingLoserView({ tool }: ToolViewProps) {
         they keep drawing budget.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: TrendingDown, label: 'Losers found', sub: `last ${range}` },
-          { icon: DollarSign, label: 'Spend at risk' },
-          { icon: Percent, label: 'Avg CPA of losers' },
-          { icon: Recycle, label: 'Recommended trims' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: TrendingDown, label: 'Losers found', sub: `last ${range}` },
+            { icon: DollarSign, label: 'Spend at risk' },
+            { icon: Percent, label: 'Avg CPA of losers' },
+            { icon: Recycle, label: 'Recommended trims' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
         <Segmented ariaLabel="Sensitivity" value={sensitivity} onChange={setSensitivity} options={SENSITIVITY_OPTIONS} />
       </div>
-      <SelectableToolTable
-        columns={[
-          { label: 'Ad group' },
-          { label: 'Campaign' },
-          { label: 'Spend', numeric: true },
-          { label: 'CPA', numeric: true },
-          { label: 'ROAS', numeric: true },
-          { label: 'Conversions', numeric: true },
-          { label: 'Suggested action' },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <SelectableToolTable
+          columns={[
+            { label: 'Ad group' },
+            { label: 'Campaign' },
+            { label: 'Spend', numeric: true },
+            { label: 'CPA', numeric: true },
+            { label: 'ROAS', numeric: true },
+            { label: 'Conversions', numeric: true },
+            { label: 'Suggested action' },
+          ]}
+          emptyMessage={NO_DATA}
+        />
+      )}
       <BulkActionBar
         count={selected.size}
         onClear={() => setSelected(new Set())}
@@ -622,7 +765,7 @@ function OverspendingLoserView({ tool }: ToolViewProps) {
   );
 }
 
-function BudgetReallocatorView({ tool }: ToolViewProps) {
+function BudgetReallocatorView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   return (
@@ -632,28 +775,43 @@ function BudgetReallocatorView({ tool }: ToolViewProps) {
         guardrails, with the projected conversion lift for every move.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: ArrowLeftRight, label: 'Reallocation opportunities', sub: `last ${range}` },
-          { icon: Wallet, label: 'Budget to move' },
-          { icon: TrendingUp, label: 'Projected conversion lift' },
-          { icon: AlertTriangle, label: 'Guardrail breaches' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: ArrowLeftRight, label: 'Reallocation opportunities', sub: `last ${range}` },
+            { icon: Wallet, label: 'Budget to move' },
+            { icon: TrendingUp, label: 'Projected conversion lift' },
+            { icon: AlertTriangle, label: 'Guardrail breaches' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
-      <SelectableToolTable
-        columns={[
-          { label: 'From ad group' },
-          { label: 'To ad group' },
-          { label: 'Amount', numeric: true },
-          { label: 'Reason' },
-          { label: 'Risk' },
-          { label: 'Status' },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <SelectableToolTable
+          columns={[
+            { label: 'From ad group' },
+            { label: 'To ad group' },
+            { label: 'Amount', numeric: true },
+            { label: 'Reason' },
+            { label: 'Risk' },
+            { label: 'Status' },
+          ]}
+          emptyMessage={NO_DATA}
+        />
+      )}
       <BulkActionBar
         count={selected.size}
         onClear={() => setSelected(new Set())}
@@ -673,7 +831,7 @@ function BudgetReallocatorView({ tool }: ToolViewProps) {
   );
 }
 
-function AutomationRulesView({ tool }: ToolViewProps) {
+function AutomationRulesView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [trigger, setTrigger] = useState('cpa_above');
   const [action, setAction] = useState('pause_ad_group');
@@ -684,29 +842,44 @@ function AutomationRulesView({ tool }: ToolViewProps) {
         native TikTok Automated Rule directly through the Automated Rules API.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: RefreshCw, label: 'Active rules' },
-          { icon: Zap, label: 'Triggered', sub: `last ${range}` },
-          { icon: CheckCircle2, label: 'Actions taken' },
-          { icon: AlertTriangle, label: 'Paused by a rule' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: RefreshCw, label: 'Active rules' },
+            { icon: Zap, label: 'Triggered', sub: `last ${range}` },
+            { icon: CheckCircle2, label: 'Actions taken' },
+            { icon: AlertTriangle, label: 'Paused by a rule' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
 
-      <ToolTable
-        columns={[
-          { label: 'Rule' },
-          { label: 'Condition' },
-          { label: 'Action' },
-          { label: 'Scope' },
-          { label: 'Status' },
-          { label: 'Last triggered' },
-        ]}
-        emptyMessage="No automated rules yet. Create one below, or connect a TikTok ad account to import existing native rules."
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Rule' },
+            { label: 'Condition' },
+            { label: 'Action' },
+            { label: 'Scope' },
+            { label: 'Status' },
+            { label: 'Last triggered' },
+          ]}
+          emptyMessage="No automated rules yet. Create one below, or connect a TikTok ad account to import existing native rules."
+        />
+      )}
 
       <div className="flex flex-col gap-3 rounded-md border border-rule bg-paper p-4">
         <div className="flex items-center justify-between">
@@ -777,7 +950,7 @@ function FieldShell({ label, children }: { label: string; children: ReactNode })
   );
 }
 
-function ConsolidationView({ tool }: ToolViewProps) {
+function ConsolidationView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
@@ -786,28 +959,43 @@ function ConsolidationView({ tool }: ToolViewProps) {
         of them can exit the TikTok learning phase, and proposes how to merge them.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: Boxes, label: 'Fragmented ad groups', sub: `last ${range}` },
-          { icon: GitCompareArrows, label: 'Consolidation candidates' },
-          { icon: Clock, label: 'Stuck in learning' },
-          { icon: Layers, label: 'Estimated merges' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: Boxes, label: 'Fragmented ad groups', sub: `last ${range}` },
+            { icon: GitCompareArrows, label: 'Consolidation candidates' },
+            { icon: Clock, label: 'Stuck in learning' },
+            { icon: Layers, label: 'Estimated merges' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
-      <ToolTable
-        columns={[
-          { label: 'Campaign' },
-          { label: 'Ad groups to merge' },
-          { label: 'Combined spend', numeric: true },
-          { label: 'Combined conversions', numeric: true },
-          { label: 'Reason' },
-          { label: 'Suggested merged budget', numeric: true },
-        ]}
-        emptyMessage={NO_DATA}
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Campaign' },
+            { label: 'Ad groups to merge' },
+            { label: 'Combined spend', numeric: true },
+            { label: 'Combined conversions', numeric: true },
+            { label: 'Reason' },
+            { label: 'Suggested merged budget', numeric: true },
+          ]}
+          emptyMessage={NO_DATA}
+        />
+      )}
       <InsightBanner icon={Boxes} tone="info">
         Consolidation groups ad groups that target near-identical audiences at low individual
         volume, and estimates whether merging them clears the 50-conversion learning-phase
@@ -819,7 +1007,7 @@ function ConsolidationView({ tool }: ToolViewProps) {
 
 // -- Reporting ----------------------------------------------------------------
 
-function ProfitabilityView({ tool }: ToolViewProps) {
+function ProfitabilityView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
@@ -828,29 +1016,44 @@ function ProfitabilityView({ tool }: ToolViewProps) {
         from your catalog - not just platform-reported spend and revenue.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: DollarSign, label: 'Billed spend', sub: `last ${range}` },
-          { icon: Coins, label: 'Revenue' },
-          { icon: Wallet, label: 'Net profit' },
-          { icon: TrendingUp, label: 'True ROAS' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: DollarSign, label: 'Billed spend', sub: `last ${range}` },
+            { icon: Coins, label: 'Revenue' },
+            { icon: Wallet, label: 'Net profit' },
+            { icon: TrendingUp, label: 'True ROAS' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
-      <ToolTable
-        columns={[
-          { label: 'Campaign' },
-          { label: 'Ad spend', numeric: true },
-          { label: 'Platform fees', numeric: true },
-          { label: 'Revenue', numeric: true },
-          { label: 'Product margin', numeric: true },
-          { label: 'Net profit', numeric: true },
-          { label: 'True ROAS', numeric: true },
-        ]}
-        emptyMessage="Connect a TikTok ad account and a Payment Portfolio billing source to see true P&L. Platform spend alone understates true cost."
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Campaign' },
+            { label: 'Ad spend', numeric: true },
+            { label: 'Platform fees', numeric: true },
+            { label: 'Revenue', numeric: true },
+            { label: 'Product margin', numeric: true },
+            { label: 'Net profit', numeric: true },
+            { label: 'True ROAS', numeric: true },
+          ]}
+          emptyMessage="Connect a TikTok ad account and a Payment Portfolio billing source to see true P&L. Platform spend alone understates true cost."
+        />
+      )}
       <InsightBanner icon={Coins} tone="info">
         Profitability keeps media spend, platform fees and product margin as separate lines and
         never sums them into one figure, so the net-profit column is always traceable back to its
@@ -860,7 +1063,7 @@ function ProfitabilityView({ tool }: ToolViewProps) {
   );
 }
 
-function CustomReportsView({ tool }: ToolViewProps) {
+function CustomReportsView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [dimension, setDimension] = useState('campaign');
   const [metric, setMetric] = useState('spend');
@@ -871,14 +1074,18 @@ function CustomReportsView({ tool }: ToolViewProps) {
         reuse and exportable to your agency&apos;s reporting stack.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: FileText, label: 'Saved reports' },
-          { icon: CalendarClock, label: 'Scheduled reports' },
-          { icon: Layers, label: 'Dimensions available' },
-          { icon: BarChart3, label: 'Metrics available' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: FileText, label: 'Saved reports' },
+            { icon: CalendarClock, label: 'Scheduled reports' },
+            { icon: Layers, label: 'Dimensions available' },
+            { icon: BarChart3, label: 'Metrics available' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <DatePreset value={range} onChange={setRange} />
         <FieldShell label="Dimension">
@@ -906,17 +1113,28 @@ function CustomReportsView({ tool }: ToolViewProps) {
           </select>
         </FieldShell>
       </div>
-      <ToolTable
-        columns={[
-          { label: 'Report name' },
-          { label: 'Dimensions' },
-          { label: 'Metrics' },
-          { label: 'Schedule' },
-          { label: 'Last run' },
-          { label: 'Owner' },
-        ]}
-        emptyMessage="No saved reports yet. Pick a dimension and metric above to start one, or connect an account to import TikTok's standard reports."
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Report name' },
+            { label: 'Dimensions' },
+            { label: 'Metrics' },
+            { label: 'Schedule' },
+            { label: 'Last run' },
+            { label: 'Owner' },
+          ]}
+          emptyMessage="No saved reports yet. Pick a dimension and metric above to start one, or connect an account to import TikTok's standard reports."
+        />
+      )}
       <InsightBanner icon={FileText} tone="info">
         Custom Reports lets you cross any dimension - advertiser, campaign, ad group, ad - with any
         metric TikTok Reporting exposes, then save and schedule the combination for recurring
@@ -926,7 +1144,7 @@ function CustomReportsView({ tool }: ToolViewProps) {
   );
 }
 
-function BenchmarkingView({ tool }: ToolViewProps) {
+function BenchmarkingView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   const [industry, setIndustry] = useState('ecommerce');
   return (
@@ -936,14 +1154,18 @@ function BenchmarkingView({ tool }: ToolViewProps) {
         a CPA can be judged against the market, not just last month.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: Scale, label: 'CPA vs benchmark', sub: `last ${range}` },
-          { icon: Percent, label: 'CTR vs benchmark' },
-          { icon: TrendingUp, label: 'CVR vs benchmark' },
-          { icon: BarChart3, label: 'Percentile rank' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: Scale, label: 'CPA vs benchmark', sub: `last ${range}` },
+            { icon: Percent, label: 'CTR vs benchmark' },
+            { icon: TrendingUp, label: 'CVR vs benchmark' },
+            { icon: BarChart3, label: 'Percentile rank' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <DatePreset value={range} onChange={setRange} />
         <FieldShell label="Industry">
@@ -959,17 +1181,28 @@ function BenchmarkingView({ tool }: ToolViewProps) {
           </select>
         </FieldShell>
       </div>
-      <ToolTable
-        columns={[
-          { label: 'Metric' },
-          { label: 'Your value', numeric: true },
-          { label: 'Industry median', numeric: true },
-          { label: 'Top quartile', numeric: true },
-          { label: 'Gap', numeric: true },
-          { label: 'Percentile', numeric: true },
-        ]}
-        emptyMessage="Connect a TikTok ad account with Partner Insights access to compare your metrics against industry benchmarks."
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Metric' },
+            { label: 'Your value', numeric: true },
+            { label: 'Industry median', numeric: true },
+            { label: 'Top quartile', numeric: true },
+            { label: 'Gap', numeric: true },
+            { label: 'Percentile', numeric: true },
+          ]}
+          emptyMessage="Connect a TikTok ad account with Partner Insights access to compare your metrics against industry benchmarks."
+        />
+      )}
       <InsightBanner icon={Scale} tone="info">
         Benchmarking pairs your trailing metrics with TikTok Partner Insights industry data for the
         selected vertical, so a number that looks fine in isolation shows up when it is actually

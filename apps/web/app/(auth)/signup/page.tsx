@@ -136,7 +136,7 @@ function SignUpForm() {
     return (
       <>
         <div className="flex flex-col gap-2">
-          <h1 className="font-display text-2xl text-ink">Verify your email</h1>
+          <h1 className="font-display text-[28px] leading-tight text-ink">Verify your email</h1>
         </div>
         <VerifyStep email={email} onBack={() => setStep('form')} />
       </>
@@ -146,13 +146,13 @@ function SignUpForm() {
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="font-display text-2xl text-ink">Get started with OrchardAds</h1>
+        <h1 className="font-display text-[28px] leading-tight text-ink">Get started with OrchardAds</h1>
         <p className="font-ui text-sm text-ink-muted">
           Diagnose, optimize and automate your TikTok Ads accounts - free to try.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         <Field label="Name" htmlFor="name" error={errors.name?.message}>
           <Input
             id="name"
@@ -183,7 +183,7 @@ function SignUpForm() {
           autoComplete="new-password"
         />
 
-        <Button type="submit" disabled={isSubmitting} className="mt-1">
+        <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1 w-full">
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
           {isSubmitting ? 'Creating account...' : 'Create account'}
         </Button>

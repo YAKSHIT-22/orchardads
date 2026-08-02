@@ -48,13 +48,13 @@ export default function SignInPage() {
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="font-display text-2xl text-ink">Welcome back</h1>
+        <h1 className="font-display text-[28px] leading-tight text-ink">Welcome back</h1>
         <p className="font-ui text-sm text-ink-muted">
           Sign in to manage, diagnose and optimize your TikTok Ads accounts.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         <Field label="Email" htmlFor="email" error={errors.email?.message}>
           <Input
             id="email"
@@ -83,7 +83,7 @@ export default function SignInPage() {
           </Link>
         </div>
 
-        <Button type="submit" disabled={isSubmitting} className="mt-1">
+        <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1 w-full">
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
           {isSubmitting ? 'Signing in...' : 'Sign in'}
         </Button>

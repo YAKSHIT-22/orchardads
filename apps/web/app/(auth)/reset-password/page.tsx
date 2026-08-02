@@ -105,13 +105,13 @@ function ResetPasswordForm() {
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="font-display text-2xl text-ink">Choose a new password</h1>
+        <h1 className="font-display text-[28px] leading-tight text-ink">Choose a new password</h1>
         <p className="font-ui text-sm text-ink-muted">
           Set a new password for your OrchardAds account. It must be 8-100 characters long.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         <PasswordField
           id="password"
           label="New password"
@@ -130,7 +130,7 @@ function ResetPasswordForm() {
           autoComplete="new-password"
         />
 
-        <Button type="submit" disabled={isSubmitting} className="mt-1">
+        <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1 w-full">
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
           {isSubmitting ? 'Resetting...' : 'Reset password'}
         </Button>

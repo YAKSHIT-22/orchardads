@@ -17,6 +17,8 @@ import {
   SelectField,
   ContextLine,
   TrendChart,
+  ToolStats,
+  ToolDataTable,
 } from '@adsos/ui';
 import {
   Blocks,
@@ -39,7 +41,7 @@ import type { ToolViewMap, ToolViewProps } from './_registry';
 
 const LAB_TABS = ['Audiences', 'Reach & frequency', 'Catalog wiring'] as const;
 
-function AudienceLabView({ tool }: ToolViewProps) {
+function AudienceLabView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof LAB_TABS)[number]>('Audiences');
   void tool;
   return (
@@ -50,6 +52,18 @@ function AudienceLabView({ tool }: ToolViewProps) {
         &amp; Frequency and DPA Catalog Management.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Users} label="Custom audiences" value="-" sub="from pixel, CRM or app" />
         <StatTile icon={UserSearch} label="Lookalike audiences" value="-" sub="expanded from seeds" />
@@ -135,6 +149,8 @@ function AudienceLabView({ tool }: ToolViewProps) {
           </DataGrid>
         )}
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Target} tone="info">
         Audience Lab is a combination tool: build the audience, plan how much reach and frequency it buys,
@@ -149,7 +165,7 @@ function AudienceLabView({ tool }: ToolViewProps) {
 
 const CATALOG_TABS = ['Feeds', 'Product groups'] as const;
 
-function CatalogManagerView({ tool }: ToolViewProps) {
+function CatalogManagerView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof CATALOG_TABS)[number]>('Feeds');
   void tool;
   return (
@@ -159,6 +175,18 @@ function CatalogManagerView({ tool }: ToolViewProps) {
         every dynamic ad group that reads from it.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={ShoppingBag} label="Products in catalog" value="-" sub="across all feeds" />
         <StatTile icon={Blocks} label="Product groups" value="-" sub="filtered subsets" />
@@ -212,6 +240,8 @@ function CatalogManagerView({ tool }: ToolViewProps) {
           </DataGrid>
         )}
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={ShoppingBag} tone="info">
         Catalog Manager keeps product feeds and the groups built on top of them healthy, so dynamic and
@@ -223,7 +253,7 @@ function CatalogManagerView({ tool }: ToolViewProps) {
 
 /* -- reach-frequency -- */
 
-function ReachFrequencyView({ tool }: ToolViewProps) {
+function ReachFrequencyView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -232,6 +262,18 @@ function ReachFrequencyView({ tool }: ToolViewProps) {
         and placement.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Radar} label="Planned reach" value="-" sub="unique users, est." />
         <StatTile icon={Gauge} label="Avg frequency" value="-" sub="impressions per user" />
@@ -280,6 +322,8 @@ function ReachFrequencyView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Radar} tone="info">
         Reach &amp; Frequency Planner estimates unique reach and average frequency for an awareness flight
@@ -293,7 +337,7 @@ function ReachFrequencyView({ tool }: ToolViewProps) {
 
 const TRACKING_TABS = ['All events', 'Standard events', 'Custom events'] as const;
 
-function TrackingDoctorView({ tool }: ToolViewProps) {
+function TrackingDoctorView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof TRACKING_TABS)[number]>('All events');
   void tool;
   return (
@@ -303,6 +347,18 @@ function TrackingDoctorView({ tool }: ToolViewProps) {
         conversion source that has gone quiet.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={ShieldCheck} label="Pixels connected" value="-" sub="across ad accounts" />
         <StatTile icon={Waypoints} label="Events API" value="-" sub="connection status" tone="iris" />
@@ -339,6 +395,8 @@ function TrackingDoctorView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={ShieldCheck} tone="info">
         Tracking Doctor checks every expected conversion source - browser pixel and server Events API - for
@@ -358,7 +416,7 @@ const STACK_CHECKLIST = [
   'CRM events syncing',
 ];
 
-function ConversionCommandView({ tool }: ToolViewProps) {
+function ConversionCommandView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -367,6 +425,18 @@ function ConversionCommandView({ tool }: ToolViewProps) {
         conversion-optimizing actions only run once measurement is healthy.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={ShieldCheck} label="Stack health score" value="-" sub="out of 100" tone="iris" />
         <StatTile icon={CircleDashed} label="Gaps found" value="-" sub="across the stack" tone="risk" />
@@ -404,6 +474,8 @@ function ConversionCommandView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Waypoints} tone="info">
         Conversion Command audits the whole tracking stack in one pass and gates conversion-optimizing
@@ -415,7 +487,7 @@ function ConversionCommandView({ tool }: ToolViewProps) {
 
 /* -- offline-events -- */
 
-function OfflineEventsView({ tool }: ToolViewProps) {
+function OfflineEventsView({ tool, data }: ToolViewProps) {
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -424,6 +496,18 @@ function OfflineEventsView({ tool }: ToolViewProps) {
         conversions and the ad that drove them.
       </ContextLine>
 
+      {data ? (
+        <>
+          <ToolStats stats={data.stats} />
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <>
       <StatGrid>
         <StatTile icon={Upload} label="Events uploaded" value="-" sub="trailing 30 days" />
         <StatTile icon={Gauge} label="Match rate" value="-" sub="matched to TikTok users" />
@@ -464,6 +548,8 @@ function OfflineEventsView({ tool }: ToolViewProps) {
           </tbody>
         </DataGrid>
       </ToolSection>
+        </>
+      )}
 
       <InsightBanner icon={Upload} tone="info">
         Offline &amp; CRM Events closes the measurement loop for conversions that happen outside the

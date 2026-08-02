@@ -27,6 +27,8 @@ import {
   Checkbox,
   BulkActionBar,
   cn,
+  ToolStats,
+  ToolDataTable,
   type DateRangeValue,
 } from '@adsos/ui';
 import {
@@ -423,7 +425,7 @@ function CampaignStudioView({ tool }: ToolViewProps) {
 
 // -- Bulk Editor: multi-select table + bulk action bar --
 
-function BulkEditorView({ tool }: ToolViewProps) {
+function BulkEditorView({ tool, data }: ToolViewProps) {
   const [level, setLevel] = useState<'campaign' | 'ad_group' | 'ad'>('ad_group');
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -434,14 +436,18 @@ function BulkEditorView({ tool }: ToolViewProps) {
         aggregate impact and risk preview before anything applies.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: Layers, label: 'Entities in scope' },
-          { icon: SquareCheckBig, label: 'Selected' },
-          { icon: DollarSign, label: 'Selected spend' },
-          { icon: BadgeDollarSign, label: 'Selected budget' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: Layers, label: 'Entities in scope' },
+            { icon: SquareCheckBig, label: 'Selected' },
+            { icon: DollarSign, label: 'Selected spend' },
+            { icon: BadgeDollarSign, label: 'Selected budget' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <Segmented
           ariaLabel="Entity level"
@@ -455,28 +461,39 @@ function BulkEditorView({ tool }: ToolViewProps) {
         />
       </div>
 
-      <DataGrid>
-        <THead>
-          <TR>
-            <TH className="w-8">
-              <Checkbox checked={false} onCheckedChange={() => {}} disabled aria-label="Select all" />
-            </TH>
-            <TH>Name</TH>
-            <TH>Campaign</TH>
-            <TH>Status</TH>
-            <TH numeric>Budget</TH>
-            <TH numeric>Bid</TH>
-            <TH>Delivery</TH>
-            <TH numeric>Spend</TH>
-            <TH numeric>CPA</TH>
-          </TR>
-        </THead>
-        <tbody>
-          <EmptyRow cols={9}>
-            {`Connect a TikTok ad account to load ${level === 'campaign' ? 'campaigns' : level === 'ad_group' ? 'ad groups' : 'ads'} for bulk editing.`}
-          </EmptyRow>
-        </tbody>
-      </DataGrid>
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <DataGrid>
+          <THead>
+            <TR>
+              <TH className="w-8">
+                <Checkbox checked={false} onCheckedChange={() => {}} disabled aria-label="Select all" />
+              </TH>
+              <TH>Name</TH>
+              <TH>Campaign</TH>
+              <TH>Status</TH>
+              <TH numeric>Budget</TH>
+              <TH numeric>Bid</TH>
+              <TH>Delivery</TH>
+              <TH numeric>Spend</TH>
+              <TH numeric>CPA</TH>
+            </TR>
+          </THead>
+          <tbody>
+            <EmptyRow cols={9}>
+              {`Connect a TikTok ad account to load ${level === 'campaign' ? 'campaigns' : level === 'ad_group' ? 'ad groups' : 'ads'} for bulk editing.`}
+            </EmptyRow>
+          </tbody>
+        </DataGrid>
+      )}
 
       <BulkActionBar
         count={selected.size}
@@ -513,7 +530,7 @@ function BulkEditorView({ tool }: ToolViewProps) {
 
 type ExplorerTab = 'interests' | 'behaviors' | 'geo';
 
-function TargetingExplorerView({ tool }: ToolViewProps) {
+function TargetingExplorerView({ tool, data }: ToolViewProps) {
   const [tab, setTab] = useState<ExplorerTab>('interests');
   const [query, setQuery] = useState('');
 
@@ -539,14 +556,18 @@ function TargetingExplorerView({ tool }: ToolViewProps) {
         estimates, so Campaign Studio&apos;s Targeting step is never guesswork.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: Tag, label: 'Interest categories' },
-          { icon: Compass, label: 'Behavior categories' },
-          { icon: Globe, label: 'Countries covered' },
-          { icon: Users, label: 'Estimated audience' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: Tag, label: 'Interest categories' },
+            { icon: Compass, label: 'Behavior categories' },
+            { icon: Globe, label: 'Countries covered' },
+            { icon: Users, label: 'Estimated audience' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Segmented
           ariaLabel="Targeting category"
@@ -568,10 +589,21 @@ function TargetingExplorerView({ tool }: ToolViewProps) {
           />
         </div>
       </div>
-      <ToolTable
-        columns={columns}
-        emptyMessage="Connect a TikTok ad account to browse the live targeting catalog and audience-size estimates."
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={columns}
+          emptyMessage="Connect a TikTok ad account to browse the live targeting catalog and audience-size estimates."
+        />
+      )}
       <InsightBanner icon={Target} tone="info">
         Every row here is a targeting option Campaign Studio and Bulk Editor can apply directly -
         the audience-size estimate updates as you combine interests, behaviors and geos, the same
@@ -583,7 +615,7 @@ function TargetingExplorerView({ tool }: ToolViewProps) {
 
 // -- Launch QA: pre-launch checklist --
 
-function LaunchQaView({ tool }: ToolViewProps) {
+function LaunchQaView({ tool, data }: ToolViewProps) {
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -591,14 +623,18 @@ function LaunchQaView({ tool }: ToolViewProps) {
         campaign that would fail or under-perform never reaches Review clean.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: Check, label: 'Checks passed' },
-          { icon: Ban, label: 'Checks failed' },
-          { icon: CircleDot, label: 'Warnings' },
-          { icon: Rocket, label: 'Ready to launch' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: Check, label: 'Checks passed' },
+            { icon: Ban, label: 'Checks failed' },
+            { icon: CircleDot, label: 'Warnings' },
+            { icon: Rocket, label: 'Ready to launch' },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <select disabled className={cn(selectCls, 'w-64 opacity-60')}>
           <option>Select a campaign to check...</option>
@@ -608,10 +644,21 @@ function LaunchQaView({ tool }: ToolViewProps) {
           Run checklist
         </Button>
       </div>
-      <ToolTable
-        columns={[{ label: 'Check' }, { label: 'Category' }, { label: 'Status' }, { label: 'Detail' }]}
-        emptyMessage="Select a campaign above to run the pre-launch checklist. Checks cover pixel firing, budget validity, targeting reach, creative specs and naming convention."
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[{ label: 'Check' }, { label: 'Category' }, { label: 'Status' }, { label: 'Detail' }]}
+          emptyMessage="Select a campaign above to run the pre-launch checklist. Checks cover pixel firing, budget validity, targeting reach, creative specs and naming convention."
+        />
+      )}
       <InsightBanner icon={ClipboardCheck} tone="info">
         Launch QA checks the TikTok Pixel is firing, the budget clears the platform minimum,
         targeting reach is not too narrow, creative specs match the ad format, and naming follows
@@ -623,7 +670,7 @@ function LaunchQaView({ tool }: ToolViewProps) {
 
 // -- Smart+ Comparator: Smart+ vs manual --
 
-function SmartPlusView({ tool }: ToolViewProps) {
+function SmartPlusView({ tool, data }: ToolViewProps) {
   const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
@@ -632,26 +679,41 @@ function SmartPlusView({ tool }: ToolViewProps) {
         the same metrics, so automation earns its budget rather than assuming it.
       </ContextLine>
       <ScopesLine tool={tool} />
-      <PlaceholderStats
-        stats={[
-          { icon: BadgeDollarSign, label: 'Smart+ campaigns', sub: `last ${range}` },
-          { icon: Layers, label: 'Manual campaigns' },
-          { icon: Percent, label: 'Avg CPA delta' },
-          { icon: TrendingUp, label: 'Recommended split' },
-        ]}
-      />
+      {data ? (
+        <ToolStats stats={data.stats} />
+      ) : (
+        <PlaceholderStats
+          stats={[
+            { icon: BadgeDollarSign, label: 'Smart+ campaigns', sub: `last ${range}` },
+            { icon: Layers, label: 'Manual campaigns' },
+            { icon: Percent, label: 'Avg CPA delta' },
+            { icon: TrendingUp, label: 'Recommended split' },
+          ]}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <DatePreset value={range} onChange={setRange} />
       </div>
-      <ToolTable
-        columns={[
-          { label: 'Metric' },
-          { label: 'Smart+', numeric: true },
-          { label: 'Manual', numeric: true },
-          { label: 'Delta', numeric: true },
-        ]}
-        emptyMessage="Connect a TikTok ad account with Smart+ campaigns running to compare them against your manual structures."
-      />
+      {data ? (
+        <>
+          {data.insight ? <InsightBanner tone="info">{data.insight}</InsightBanner> : null}
+          <ToolDataTable
+            columns={data.columns}
+            rows={data.rows}
+            emptyMessage={data.insight ?? 'No results in range.'}
+          />
+        </>
+      ) : (
+        <ToolTable
+          columns={[
+            { label: 'Metric' },
+            { label: 'Smart+', numeric: true },
+            { label: 'Manual', numeric: true },
+            { label: 'Delta', numeric: true },
+          ]}
+          emptyMessage="Connect a TikTok ad account with Smart+ campaigns running to compare them against your manual structures."
+        />
+      )}
       <InsightBanner icon={BadgeDollarSign} tone="info">
         Smart+ Comparator lines spend, CPA, ROAS and conversions up side by side so you can see
         whether Smart+&apos;s automated targeting and bidding is actually beating your manual
