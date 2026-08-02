@@ -1,6 +1,7 @@
 import { RecLedger } from '@/components/inbox/rec-ledger';
 import { TOOL_VIEWS } from '@/components/tools/views';
 import { getWorkspaceDashboard } from '@/lib/data/platform';
+import { getToolData } from '@/lib/tools/data';
 import { TOOLS, toolBySlug } from '@/lib/tools-registry';
 import { getWorkspaceContext } from '@/lib/session';
 import { Button, EmptyState, ToolHeader } from '@adsos/ui';
@@ -20,18 +21,21 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
   const Icon = tool.icon;
   const View = TOOL_VIEWS[slug];
   const ctx = await getWorkspaceContext();
-  const data = tool.status === 'live' && ctx ? await getWorkspaceDashboard(ctx) : null;
-  const related = data?.recs.filter((r) => r.tool === slug) ?? [];
 
-  // A tool with a dedicated view owns its whole body (its own header + sections).
+  // A tool with a dedicated view owns its whole body. Feed it real data computed
+  // from the synced store (undefined when nothing is connected).
   if (View) {
+    const toolData = ctx ? await getToolData(slug, ctx) : undefined;
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-6 sm:px-10">
         <ToolHeader icon={Icon} title={tool.name} description={tool.description} />
-        <View tool={tool} />
+        <View tool={tool} data={toolData?.connected ? toolData : undefined} />
       </div>
     );
   }
+
+  const data = tool.status === 'live' && ctx ? await getWorkspaceDashboard(ctx) : null;
+  const related = data?.recs.filter((r) => r.tool === slug) ?? [];
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 sm:px-10">
