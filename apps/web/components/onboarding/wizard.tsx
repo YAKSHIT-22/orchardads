@@ -64,7 +64,7 @@ function Shell({ active, children }: { active: number; children: React.ReactNode
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-8 px-6 py-12">
       <div className="flex items-center justify-between">
-        <Logo width={128} className="h-7 w-auto" />
+        <Logo width={160} className="h-9 w-auto" />
         <Link href="/dashboard" className="font-ui text-[12px] text-ink-faint hover:text-ink">
           Skip for now
         </Link>

@@ -1,22 +1,10 @@
 import { type ToolDef, toolsByCategory } from '@/lib/tools-registry';
-import { Badge, type BadgeVariant, ToolHeader } from '@adsos/ui';
+import { Badge, ToolHeader } from '@adsos/ui';
 import { LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 
-const STATUS_LABEL: Record<ToolDef['status'], string> = {
-  live: 'live',
-  soon: 'soon',
-  gated: 'gated',
-};
-const STATUS_VARIANT: Record<ToolDef['status'], BadgeVariant> = {
-  live: 'applied',
-  soon: 'neutral',
-  gated: 'attention',
-};
-
 function ToolCard({ tool }: { tool: ToolDef }) {
   const Icon = tool.icon;
-  const platforms = tool.platforms === 'ALL' ? 'All platforms' : tool.platforms.join(', ');
   return (
     <Link
       href={tool.href ?? `/tools/${tool.slug}`}
@@ -26,13 +14,10 @@ function ToolCard({ tool }: { tool: ToolDef }) {
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-iris-wash text-iris">
           <Icon className="h-4 w-4" />
         </div>
-        <Badge variant={STATUS_VARIANT[tool.status]}>{STATUS_LABEL[tool.status]}</Badge>
+        {tool.combination && <Badge variant="iris">combo</Badge>}
       </div>
       <span className="font-ui text-[13px] font-semibold text-ink">{tool.name}</span>
       <p className="font-ui text-[12px] leading-4 text-ink-muted">{tool.description}</p>
-      <span className="mt-auto font-data text-[10px] text-ink-faint">
-        {platforms} {'\u00B7'} phase {tool.phase}
-      </span>
     </Link>
   );
 }

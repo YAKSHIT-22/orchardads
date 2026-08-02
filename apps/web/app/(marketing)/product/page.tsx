@@ -38,14 +38,9 @@ function ToolCard({ t }: { t: ToolDef }) {
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-iris-wash text-iris">
           <Icon className="h-4 w-4" />
         </div>
-        <div className="flex items-center gap-1.5">
-          {t.combination && (
-            <span className="rounded-sm bg-iris-wash px-1.5 py-0.5 text-label text-iris">combo</span>
-          )}
-          {t.status === 'live' && (
-            <span className="rounded-sm bg-applied-wash px-1.5 py-0.5 text-label text-applied">live</span>
-          )}
-        </div>
+        {t.combination && (
+          <span className="rounded-sm bg-iris-wash px-1.5 py-0.5 text-label text-iris">combo</span>
+        )}
       </div>
       <span className="font-ui text-[13px] font-semibold text-ink">{t.name}</span>
       <p className="font-ui text-[12px] leading-4 text-ink-muted">{t.description}</p>

@@ -86,7 +86,7 @@ export function NavRail() {
       style={{ background: 'var(--sidebar)', borderColor: 'var(--sidebar-border)' }}
     >
       <div className="flex items-center gap-2 px-4 py-4">
-        <Logo href="/dashboard" width={124} className="h-7 w-auto" />
+        <Logo href="/dashboard" width={150} className="h-8 w-auto" />
       </div>
 
       {/* Scrollable so the full tool catalog fits without pushing Settings offscreen. */}

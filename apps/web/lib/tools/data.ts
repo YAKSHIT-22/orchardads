@@ -171,6 +171,10 @@ export async function getToolData(slug: string, ctx: WorkspaceContext): Promise<
     case 'custom-reports':
     case 'benchmarking':
     case 'delivery-doctor':
+    case 'dayparting':
+    case 'change-history':
+    case 'automation-rules':
+    case 'business-recommendation':
     case 'creative-fatigue': {
       return {
         connected: true,

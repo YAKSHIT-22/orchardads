@@ -12,7 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-screen w-full bg-paper">
       <div className="flex w-full flex-col justify-center px-6 py-12 sm:px-12 md:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto flex w-full max-w-md flex-col gap-10">
-          <Logo width={150} className="h-9 w-auto" />
+          <Logo width={172} className="h-10 w-auto" />
           {children}
         </div>
       </div>
