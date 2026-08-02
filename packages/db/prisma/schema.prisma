@@ -1,0 +1,522 @@
+// adsos — starter schema
+// Neon Postgres + Prisma 6 + driver adapter.
+// metric_fact is created by raw SQL migration (partitioned) — see ARCHITECTURE.md §5.3.
+// Every tenant table carries workspaceId and is covered by RLS.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // pooled
+  directUrl = env("DIRECT_URL")     // migrations
+}
+
+// ─────────────────────────── Tenancy ───────────────────────────
+
+model Organization {
+  id         String      @id @default(uuid()) @db.Uuid
+  name       String
+  stripeId   String?     @unique
+  plan       Plan        @default(FREE)
+  createdAt  DateTime    @default(now()) @db.Timestamptz
+  workspaces Workspace[]
+}
+
+model Workspace {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String
+  slug           String   @unique
+  killSwitch     Boolean  @default(false)
+  guardrails     Json     @default("{}")  // overrides ARCHITECTURE.md §7.3 defaults
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      Member[]
+  connections  PlatformConnection[]
+  accounts     AdvertiserAccount[]
+  campaigns    Campaign[]
+  adGroups     AdGroup[]
+  ads          Ad[]
+  creatives    Creative[]
+  audiences    Audience[]
+  recs         Recommendation[]
+  actions      Action[]
+  rules        AutomationRule[]
+  alerts       Alert[]
+
+  @@index([organizationId])
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  members   Member[]
+}
+
+model Member {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  userId      String   @db.Uuid
+  role        Role     @default(VIEWER)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  OPERATOR
+  ANALYST
+  VIEWER
+}
+
+enum Plan {
+  FREE
+  SOLO
+  GROWTH
+  AGENCY
+  AGENCY_PRO
+  ENTERPRISE
+}
+
+// ───────────────────── Connections & capability ─────────────────────
+
+enum Platform {
+  TIKTOK
+}
+
+model PlatformConnection {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  platform    Platform
+
+  // Envelope-encrypted. Never serialized to the client. ARCHITECTURE.md §10.
+  accessTokenCipher  Bytes
+  accessTokenIv      Bytes
+  accessTokenTag     Bytes
+  refreshTokenCipher Bytes?
+  refreshTokenIv     Bytes?
+  refreshTokenTag    Bytes?
+  keyVersion         Int      @default(1)
+  accessTokenExpires DateTime? @db.Timestamptz
+
+  scopes       String[]
+  externalUserId String?
+  apiVersion   String
+  capabilities Json     @default("{}")   // CapabilityManifest, refreshed hourly
+  status       ConnectionStatus @default(ACTIVE)
+  statusReason String?
+  createdAt    DateTime @default(now()) @db.Timestamptz
+  updatedAt    DateTime @updatedAt @db.Timestamptz
+
+  workspace Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  accounts  AdvertiserAccount[]
+  syncState SyncState[]
+
+  @@unique([workspaceId, platform])
+  @@index([status])
+}
+
+enum ConnectionStatus {
+  ACTIVE
+  NEEDS_REAUTH
+  SUSPENDED
+  REVOKED
+}
+
+model SyncState {
+  id                  String    @id @default(uuid()) @db.Uuid
+  connectionId        String    @db.Uuid
+  kind                SyncKind
+  stage               String?
+  cursor              String?
+  lastAttemptAt       DateTime? @db.Timestamptz
+  lastSuccessAt       DateTime? @db.Timestamptz
+  consecutiveFailures Int       @default(0)
+  lastError           String?
+
+  connection PlatformConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, kind])
+  @@index([lastSuccessAt])
+}
+
+enum SyncKind {
+  CONFIG
+  METRICS_RECENT
+  METRICS_BACKFILL
+}
+
+// ───────────────────────── Ad entities ─────────────────────────
+// Shared shape: see ARCHITECTURE.md §5.1. rawStatus/rawObjective are mandatory.
+
+enum RetentionPolicy {
+  PERSIST
+  ANALYTICS_ONLY
+  PROXY_ONLY
+}
+
+enum EntityStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+  PENDING_REVIEW
+  REJECTED
+  ENDED
+  UNKNOWN
+}
+
+model AdvertiserAccount {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @db.Uuid
+  connectionId String   @db.Uuid
+  platform     Platform
+  externalId   String
+  name         String
+  currency     String   @db.Char(3)
+  timezone     String
+  status       EntityStatus @default(UNKNOWN)
+  rawStatus    String?
+  extension    Json     @default("{}")
+  retentionPolicy RetentionPolicy @default(PERSIST)
+  lastSyncedAt DateTime? @db.Timestamptz
+
+  workspace  Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  connection PlatformConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  campaigns  Campaign[]
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId, platform])
+}
+
+model Campaign {
+  id                String   @id @default(uuid()) @db.Uuid
+  workspaceId       String   @db.Uuid
+  accountId         String   @db.Uuid
+  platform          Platform
+  externalId        String
+  name              String
+  status            EntityStatus @default(UNKNOWN)
+  rawStatus         String?
+  normalizedObjective String?
+  rawObjective      String?
+  currency          String   @db.Char(3)
+  budgetMinor       BigInt?
+  budgetType        BudgetType?
+  extension         Json     @default("{}")
+  rawSnapshot       Json?    // null unless retentionPolicy = PERSIST
+  retentionPolicy   RetentionPolicy @default(PERSIST)
+  apiVersion        String
+  lastSyncedAt      DateTime? @db.Timestamptz
+
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  account   AdvertiserAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  adGroups  AdGroup[]
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId, accountId, status])
+}
+
+enum BudgetType {
+  DAILY
+  LIFETIME
+}
+
+/// Reddit Ad Group · Spotify Ad Set · Snap Ad Squad · Pinterest Ad Group
+model AdGroup {
+  id              String   @id @default(uuid()) @db.Uuid
+  workspaceId     String   @db.Uuid
+  campaignId      String   @db.Uuid
+  platform        Platform
+  externalId      String
+  name            String
+  status          EntityStatus @default(UNKNOWN)
+  rawStatus       String?
+  currency        String   @db.Char(3)
+  budgetMinor     BigInt?
+  budgetType      BudgetType?
+  bidMinor        BigInt?
+  bidStrategy     String?
+  conversionSourceId String? @db.Uuid   // Reddit: conversion_pixel_id lives here
+  targeting       Json     @default("{}")
+  extension       Json     @default("{}")
+  rawSnapshot     Json?
+  retentionPolicy RetentionPolicy @default(PERSIST)
+  apiVersion      String
+  lastSyncedAt    DateTime? @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  campaign  Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  ads       Ad[]
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId, campaignId, status])
+}
+
+model Ad {
+  id              String   @id @default(uuid()) @db.Uuid
+  workspaceId     String   @db.Uuid
+  adGroupId       String   @db.Uuid
+  platform        Platform
+  externalId      String
+  name            String
+  status          EntityStatus @default(UNKNOWN)
+  rawStatus       String?
+  creativeId      String?  @db.Uuid
+  extension       Json     @default("{}")
+  rawSnapshot     Json?
+  retentionPolicy RetentionPolicy @default(PERSIST)
+  apiVersion      String
+  lastSyncedAt    DateTime? @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  adGroup   AdGroup   @relation(fields: [adGroupId], references: [id], onDelete: Cascade)
+  creative  Creative? @relation(fields: [creativeId], references: [id])
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId, adGroupId, status])
+}
+
+model Creative {
+  id              String   @id @default(uuid()) @db.Uuid
+  workspaceId     String   @db.Uuid
+  platform        Platform
+  externalId      String
+  name            String?
+  assetType       String?  // AUDIO | VIDEO | IMAGE
+  aspectRatio     String?
+  conceptId       String?  @db.Uuid  // Creative Concept Graph; never set for PROXY_ONLY
+  extension       Json     @default("{}")
+  rawSnapshot     Json?
+  retentionPolicy RetentionPolicy @default(PERSIST)
+  lastSyncedAt    DateTime? @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  ads       Ad[]
+
+  @@unique([workspaceId, platform, externalId])
+}
+
+model Audience {
+  id              String   @id @default(uuid()) @db.Uuid
+  workspaceId     String   @db.Uuid
+  platform        Platform
+  externalId      String
+  name            String
+  kind            String?
+  sizeEstimate    BigInt?
+  extension       Json     @default("{}")
+  retentionPolicy RetentionPolicy @default(PERSIST)
+  lastSyncedAt    DateTime? @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, platform, externalId])
+}
+
+model ConversionSource {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @db.Uuid
+  platform     Platform
+  externalId   String
+  kind         String   // PIXEL | CAPI | MMP | DATASET
+  name         String?
+  health       TrackingHealth @default(UNKNOWN)
+  healthDetail Json     @default("{}")
+  lastEventAt  DateTime? @db.Timestamptz
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId, health])
+}
+
+enum TrackingHealth {
+  HEALTHY
+  DEGRADED
+  BROKEN
+  UNKNOWN
+}
+
+// ─────────────────── Recommendations & actions ───────────────────
+
+model Recommendation {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @db.Uuid
+  platform     Platform
+  kind         String
+  entityType   String
+  entityId     String   @db.Uuid
+  evidence     Json     // facts from the metric store — never model-authored numbers
+  confidence   Confidence
+  estimatedImpact Json  // { metric, deltaMin, deltaMax, basis }
+  riskBand     RiskBand
+  explanation  String?  // model-authored prose only
+  status       RecStatus @default(OPEN)
+  detectedAt   DateTime @default(now()) @db.Timestamptz
+  resolvedAt   DateTime? @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actions   Action[]
+
+  @@index([workspaceId, status, riskBand])
+  @@index([workspaceId, entityId])
+}
+
+enum Confidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RiskBand {
+  SAFE
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RecStatus {
+  OPEN
+  PROPOSED
+  APPLIED
+  DISMISSED
+  EXPIRED
+}
+
+model Action {
+  id               String   @id @default(uuid()) @db.Uuid
+  workspaceId      String   @db.Uuid
+  recommendationId String?  @db.Uuid
+  ruleId           String?  @db.Uuid
+  platform         Platform
+  kind             String
+  entityType       String
+  entityId         String   @db.Uuid
+  externalEntityId String
+
+  proposedPayload Json
+  humanDiff       Json     // [{ field, from, to, changed }]
+  validation      Json
+  estimatedImpact Json
+  riskBand        RiskBand
+  approvalPolicy  Json
+  idempotencyKey  String
+  previousState   Json?    // captured immediately before write, not from last sync
+  apiResponse     Json?
+  rollbackPlan    Json?    // null ⇒ irreversible; UI must say so
+  status          ActionStatus @default(PROPOSED)
+  error           String?
+
+  proposedBy  String?  @db.Uuid
+  approvedBy  String?  @db.Uuid
+  proposedAt  DateTime @default(now()) @db.Timestamptz
+  approvedAt  DateTime? @db.Timestamptz
+  appliedAt   DateTime? @db.Timestamptz
+
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  recommendation Recommendation? @relation(fields: [recommendationId], references: [id])
+  rule           AutomationRule? @relation(fields: [ruleId], references: [id])
+  executions     ActionExecution[]
+
+  @@unique([workspaceId, idempotencyKey])
+  @@index([workspaceId, status, riskBand])
+  @@index([workspaceId, entityId, kind, appliedAt])  // cooldown lookups
+}
+
+enum ActionStatus {
+  PROPOSED
+  APPROVED
+  QUEUED
+  APPLYING
+  APPLIED
+  FAILED
+  ROLLED_BACK
+  DISMISSED
+}
+
+model ActionExecution {
+  id          String   @id @default(uuid()) @db.Uuid
+  actionId    String   @db.Uuid
+  attempt     Int
+  request     Json
+  response    Json?
+  httpStatus  Int?
+  rateLimit   Json?
+  durationMs  Int?
+  error       String?
+  startedAt   DateTime @default(now()) @db.Timestamptz
+  finishedAt  DateTime? @db.Timestamptz
+
+  action Action @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@index([actionId, attempt])
+}
+
+model AutomationRule {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @db.Uuid
+  name         String
+  platform     Platform?
+  scope        Json     // which entities
+  condition    Json     // thresholds
+  action       Json     // proposed action template
+  cooldownH    Int      @default(48)
+  maxRiskBand  RiskBand @default(LOW)   // a rule may never escalate beyond this
+  requiresApproval Boolean @default(true)
+  enabled      Boolean  @default(true)
+  lastFiredAt  DateTime? @db.Timestamptz
+  createdAt    DateTime @default(now()) @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actions   Action[]
+
+  @@index([workspaceId, enabled])
+}
+
+model Alert {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  severity    Severity
+  kind        String
+  title       String
+  detail      Json     @default("{}")
+  acknowledgedAt DateTime? @db.Timestamptz
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, acknowledgedAt, severity])
+}
+
+enum Severity {
+  INFO
+  WARN
+  CRITICAL
+}
+
+/// Append-only. No update or delete path exists in the repository layer.
+model AuditEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  actorId     String?  @db.Uuid
+  actorType   String   // USER | RULE | SYSTEM
+  verb        String
+  subjectType String
+  subjectId   String?
+  before      Json?
+  after       Json?
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, subjectType, subjectId])
+}

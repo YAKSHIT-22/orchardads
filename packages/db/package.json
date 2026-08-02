@@ -1,0 +1,37 @@
+{
+  "name": "@adsos/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./repositories": "./src/repositories/index.ts"
+  },
+  "scripts": {
+    "build": "prisma generate && tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "test": "vitest run",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate deploy",
+    "migrate:dev": "prisma migrate dev",
+    "push": "prisma db push",
+    "sql:metric": "prisma db execute --file prisma/sql/0001_metric_fact.sql --schema prisma/schema.prisma",
+    "sql:rls": "prisma db execute --file prisma/sql/0002_rls.sql --schema prisma/schema.prisma",
+    "sql:grants": "prisma db execute --file prisma/sql/0003_grants.sql --schema prisma/schema.prisma",
+    "db:setup": "prisma db push && pnpm sql:metric && pnpm sql:rls && pnpm sql:grants"
+  },
+  "dependencies": {
+    "@adsos/core": "workspace:*",
+    "@adsos/metrics": "workspace:*",
+    "@prisma/client": "^6.19.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "prisma": "^6.19.3",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
+  }
+}

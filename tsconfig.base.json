@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": false,
+    "paths": {
+      "@adsos/core": ["./packages/core/src/index.ts"],
+      "@adsos/core/*": ["./packages/core/src/*"],
+      "@adsos/db": ["./packages/db/src/index.ts"],
+      "@adsos/db/*": ["./packages/db/src/*"],
+      "@adsos/platform-core": ["./packages/platform-core/src/index.ts"],
+      "@adsos/platform-core/*": ["./packages/platform-core/src/*"],
+      "@adsos/platform-reddit": ["./packages/platform-reddit/src/index.ts"],
+      "@adsos/platform-spotify": ["./packages/platform-spotify/src/index.ts"],
+      "@adsos/platform-snap": ["./packages/platform-snap/src/index.ts"],
+      "@adsos/platform-pinterest": ["./packages/platform-pinterest/src/index.ts"],
+      "@adsos/metrics": ["./packages/metrics/src/index.ts"],
+      "@adsos/recommendations": ["./packages/recommendations/src/index.ts"],
+      "@adsos/automation": ["./packages/automation/src/index.ts"],
+      "@adsos/policy-engine": ["./packages/policy-engine/src/index.ts"],
+      "@adsos/ai": ["./packages/ai/src/index.ts"],
+      "@adsos/ui": ["./packages/ui/src/index.ts"],
+      "@adsos/ui/*": ["./packages/ui/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", ".next"]
+}

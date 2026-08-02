@@ -1,0 +1,26 @@
+{
+  "name": "adsos",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "postinstall": "pnpm --filter @adsos/db generate",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "biome format --write .",
+    "db:generate": "pnpm --filter @adsos/db generate",
+    "db:migrate": "pnpm --filter @adsos/db migrate"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "turbo": "^2.10.7",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
+  }
+}

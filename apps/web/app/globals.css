@@ -1,0 +1,185 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   DESIGN SYSTEM — tokens (DESIGN_SYSTEM.md §2)
+   oklch throughout. Chrome is achromatic; saturated colour is
+   rationed to exactly two jobs: platform identity + risk state.
+   ============================================================ */
+
+:root {
+  /* ── Ground ─────────────────────────────────────────── */
+  --console: oklch(0.18 0.018 265);
+  --console-alt: oklch(0.24 0.02 265);
+  --paper: oklch(0.985 0.003 265);
+  --paper-sunk: oklch(0.965 0.004 265);
+
+  /* ── Neutrals ───────────────────────────────────────── */
+  --ink: oklch(0.22 0.012 265);
+  --ink-muted: oklch(0.48 0.01 265);
+  --ink-faint: oklch(0.64 0.008 265);
+  --rule: oklch(0.9 0.005 265);
+  --rule-strong: oklch(0.82 0.006 265);
+
+  /* ── Brand: iris. Used only for "the next action". ──── */
+  --iris: oklch(0.55 0.19 275);
+  --iris-hover: oklch(0.49 0.2 275);
+  --iris-wash: oklch(0.955 0.028 275);
+  --iris-edge: oklch(0.86 0.07 275);
+
+  /* ── State. Desaturated so platform rails stay loudest. */
+  --applied: oklch(0.52 0.11 155);
+  --applied-wash: oklch(0.955 0.028 155);
+  --attention: oklch(0.7 0.12 75);
+  --attention-wash: oklch(0.965 0.035 75);
+  --risk: oklch(0.55 0.16 30);
+  --risk-wash: oklch(0.96 0.03 30);
+
+  /* ── Platform identity. ONLY in 3px rails and chips. ── */
+  --p-tiktok: oklch(0.70 0.14 200);
+
+  /* ── Diff semantics (the signature component) ───────── */
+  --diff-from-bg: oklch(0.965 0.02 30);
+  --diff-from-fg: oklch(0.45 0.13 30);
+  --diff-to-bg: oklch(0.96 0.024 155);
+  --diff-to-fg: oklch(0.42 0.11 155);
+
+  /* ── Geometry ───────────────────────────────────────── */
+  --r-sm: 3px;
+  --r-md: 5px;
+  --r-lg: 8px;
+  --rail: 3px;
+  --row-h: 38px;
+  --row-h-comfy: 46px;
+
+  /* ── Font families (next/font injects the real faces) ── */
+  --font-bricolage: var(--font-bricolage-src), system-ui, sans-serif;
+  --font-public-sans: var(--font-public-sans-src), system-ui, sans-serif;
+  --font-plex-mono: var(--font-plex-mono-src), ui-monospace, monospace;
+}
+
+.dark {
+  --paper: oklch(0.19 0.014 265);
+  --paper-sunk: oklch(0.23 0.014 265);
+  --ink: oklch(0.95 0.004 265);
+  --ink-muted: oklch(0.72 0.008 265);
+  --ink-faint: oklch(0.56 0.008 265);
+  --rule: oklch(0.32 0.01 265);
+  --rule-strong: oklch(0.4 0.012 265);
+  --iris: oklch(0.68 0.17 275);
+  --iris-wash: oklch(0.27 0.045 275);
+  --applied-wash: oklch(0.26 0.05 155);
+  --attention-wash: oklch(0.26 0.05 75);
+  --risk-wash: oklch(0.26 0.05 30);
+  --iris-edge: oklch(0.4 0.09 275);
+  --diff-from-bg: oklch(0.26 0.045 30);
+  --diff-to-bg: oklch(0.26 0.045 155);
+}
+
+/* System dark mode, unless the root has explicitly opted into light. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --paper: oklch(0.19 0.014 265);
+    --paper-sunk: oklch(0.23 0.014 265);
+    --ink: oklch(0.95 0.004 265);
+    --ink-muted: oklch(0.72 0.008 265);
+    --ink-faint: oklch(0.56 0.008 265);
+    --rule: oklch(0.32 0.01 265);
+    --rule-strong: oklch(0.4 0.012 265);
+    --iris: oklch(0.68 0.17 275);
+    --iris-wash: oklch(0.27 0.045 275);
+    --applied-wash: oklch(0.26 0.05 155);
+    --attention-wash: oklch(0.26 0.05 75);
+    --risk-wash: oklch(0.26 0.05 30);
+    --iris-edge: oklch(0.4 0.09 275);
+    --diff-from-bg: oklch(0.26 0.045 30);
+    --diff-to-bg: oklch(0.26 0.045 155);
+  }
+}
+
+/* ── Map tokens to Tailwind utilities (v4 @theme inline) ── */
+@theme inline {
+  --color-console: var(--console);
+  --color-console-alt: var(--console-alt);
+  --color-paper: var(--paper);
+  --color-paper-sunk: var(--paper-sunk);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-iris: var(--iris);
+  --color-iris-hover: var(--iris-hover);
+  --color-iris-wash: var(--iris-wash);
+  --color-iris-edge: var(--iris-edge);
+  --color-applied: var(--applied);
+  --color-applied-wash: var(--applied-wash);
+  --color-attention: var(--attention);
+  --color-attention-wash: var(--attention-wash);
+  --color-risk: var(--risk);
+  --color-risk-wash: var(--risk-wash);
+  --color-p-tiktok: var(--p-tiktok);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+
+  --font-display: var(--font-bricolage);
+  --font-ui: var(--font-public-sans);
+  --font-data: var(--font-plex-mono);
+}
+
+/* ── Base ── */
+* {
+  border-color: var(--rule);
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-public-sans);
+  font-size: 14px;
+  line-height: 21px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typographic roles (DESIGN_SYSTEM.md §3) ── */
+.font-display {
+  font-family: var(--font-bricolage);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.font-ui {
+  font-family: var(--font-public-sans);
+}
+.font-data {
+  font-family: var(--font-plex-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.text-label {
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── Focus ring (accessibility floor §10) ── */
+:focus-visible {
+  outline: 2px solid var(--iris);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
