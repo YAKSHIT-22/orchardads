@@ -2,7 +2,17 @@ import { SyncButton } from '@/components/sync-button';
 import { getWorkspaceContext } from '@/lib/session';
 import type { Platform } from '@adsos/core';
 import { repositories } from '@adsos/db';
-import { Button, Card, CardContent, CardHeader, CardTitle, SyncStatus, ToolHeader } from '@adsos/ui';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  SyncStatus,
+  ToolHeader,
+  platformLabel,
+} from '@adsos/ui';
 import { Building2 } from 'lucide-react';
 
 type Row = { platform: Platform; phase: number; note: string; connectable: boolean };
@@ -30,29 +40,31 @@ export default async function AccountsPage() {
         {CATALOG.map((c) => {
           const isConnected = connected.has(c.platform);
           return (
-            <Card key={c.platform} platform={c.platform}>
+            <Card key={c.platform} platform={c.platform} interactive>
               <CardHeader className="flex-row items-center justify-between">
-                <CardTitle>{c.platform.charAt(0) + c.platform.slice(1).toLowerCase()}</CardTitle>
+                <CardTitle>{platformLabel(c.platform)}</CardTitle>
                 {isConnected ? (
                   <SyncStatus tone="fresh" label="connected" />
                 ) : (
                   <span className="text-label text-ink-faint">phase {c.phase}</span>
                 )}
               </CardHeader>
-              <CardContent className="flex flex-col gap-3">
+              <CardContent>
                 <p className="font-ui text-[12px] text-ink-muted">{c.note}</p>
+              </CardContent>
+              <CardFooter>
                 {isConnected ? (
                   <SyncButton platform={c.platform} />
                 ) : c.connectable ? (
                   <a href={`/api/oauth/${c.platform.toLowerCase()}`}>
-                    <Button size="sm">Connect {c.platform.charAt(0) + c.platform.slice(1).toLowerCase()}</Button>
+                    <Button size="sm">Connect {platformLabel(c.platform)}</Button>
                   </a>
                 ) : (
                   <Button variant="ghost" size="sm" disabled>
                     Not yet available
                   </Button>
                 )}
-              </CardContent>
+              </CardFooter>
             </Card>
           );
         })}

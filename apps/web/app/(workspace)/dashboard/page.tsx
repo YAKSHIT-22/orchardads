@@ -32,7 +32,7 @@ export default async function DashboardPage() {
           message="Connect TikTok. The first sync pulls 30 days of data and the recommendation engine runs - every number traces to a synced metric."
           action={
             <Link href="/onboarding">
-              <Button>Connect a platform</Button>
+              <Button>Connect TikTok</Button>
             </Link>
           }
         />

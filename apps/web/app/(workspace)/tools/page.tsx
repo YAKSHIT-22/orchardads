@@ -1,5 +1,5 @@
 import { type ToolDef, toolsByCategory } from '@/lib/tools-registry';
-import { ToolHeader, cn } from '@adsos/ui';
+import { Badge, type BadgeVariant, ToolHeader } from '@adsos/ui';
 import { LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 
@@ -8,10 +8,10 @@ const STATUS_LABEL: Record<ToolDef['status'], string> = {
   soon: 'soon',
   gated: 'gated',
 };
-const STATUS_STYLE: Record<ToolDef['status'], string> = {
-  live: 'text-applied bg-applied-wash',
-  soon: 'text-ink-muted bg-paper-sunk',
-  gated: 'text-attention bg-attention-wash',
+const STATUS_VARIANT: Record<ToolDef['status'], BadgeVariant> = {
+  live: 'applied',
+  soon: 'neutral',
+  gated: 'attention',
 };
 
 function ToolCard({ tool }: { tool: ToolDef }) {
@@ -20,15 +20,13 @@ function ToolCard({ tool }: { tool: ToolDef }) {
   return (
     <Link
       href={tool.href ?? `/tools/${tool.slug}`}
-      className="group flex flex-col gap-2 rounded-md border border-rule bg-paper p-3 transition-colors hover:border-rule-strong"
+      className="group flex flex-col gap-2 rounded-md border border-rule bg-paper p-3 shadow-xs transition-all hover:border-rule-strong hover:shadow-sm"
     >
       <div className="flex items-start justify-between">
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-iris-wash text-iris">
           <Icon className="h-4 w-4" />
         </div>
-        <span className={cn('rounded-sm px-1.5 py-0.5 text-label', STATUS_STYLE[tool.status])}>
-          {STATUS_LABEL[tool.status]}
-        </span>
+        <Badge variant={STATUS_VARIANT[tool.status]}>{STATUS_LABEL[tool.status]}</Badge>
       </div>
       <span className="font-ui text-[13px] font-semibold text-ink">{tool.name}</span>
       <p className="font-ui text-[12px] leading-4 text-ink-muted">{tool.description}</p>

@@ -122,6 +122,8 @@ export type ActionKind =
   | 'SET_BUDGET'
   | 'SET_BID'
   | 'RENAME'
+  | 'UPDATE'
+  | 'DELETE'
   | 'CREATE_CAMPAIGN'
   | 'CREATE_AD_GROUP'
   | 'CREATE_AD';

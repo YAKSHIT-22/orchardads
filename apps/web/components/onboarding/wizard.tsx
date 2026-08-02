@@ -3,7 +3,7 @@
 import { listPlatformAccounts, saveSelectedAccounts } from '@/lib/actions/onboarding';
 import { ONBOARDING_LIST, type PlatformOnboarding } from '@/lib/onboarding';
 import { TokenConnect } from './token-connect';
-import { Button, cn } from '@adsos/ui';
+import { Button, cn, platformLabel } from '@adsos/ui';
 import { ArrowRight, BellRing, Check, ChevronLeft, Database, ListChecks, Loader2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -13,7 +13,7 @@ type Stage = 'choose' | 'connect' | 'accounts' | 'ramp';
 const STEPS = ['Connect', 'Select accounts', 'First value'];
 
 function title(p: PlatformOnboarding) {
-  return p.platform.charAt(0) + p.platform.slice(1).toLowerCase();
+  return platformLabel(p.platform);
 }
 
 function Progress({ active }: { active: number }) {

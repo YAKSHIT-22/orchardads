@@ -55,7 +55,12 @@ function budgetChangePct(prev?: bigint | null, next?: bigint | null): number | n
 }
 
 function riskBandFor(input: PolicyInput): RiskBand {
-  if (input.kind === 'CREATE_CAMPAIGN' || input.kind === 'CREATE_AD_GROUP' || input.kind === 'CREATE_AD') {
+  if (
+    input.kind === 'CREATE_CAMPAIGN' ||
+    input.kind === 'CREATE_AD_GROUP' ||
+    input.kind === 'CREATE_AD' ||
+    input.kind === 'DELETE'
+  ) {
     return 'HIGH';
   }
   if ((input.bulkCount ?? 0) > 10) return 'HIGH';

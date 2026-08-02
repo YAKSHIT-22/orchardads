@@ -1,15 +1,15 @@
 import { RollbackButton } from '@/components/audit/rollback-button';
 import { getWorkspaceContext } from '@/lib/session';
 import { repositories } from '@adsos/db';
-import { Card, EmptyState, RiskBadge, ToolHeader, cn } from '@adsos/ui';
+import { Badge, type BadgeVariant, Card, EmptyState, RiskBadge, ToolHeader } from '@adsos/ui';
 import { History } from 'lucide-react';
 
-const STATUS_STYLE: Record<string, string> = {
-  APPLIED: 'text-applied bg-applied-wash',
-  FAILED: 'text-risk bg-risk-wash',
-  ROLLED_BACK: 'text-attention bg-attention-wash',
-  PROPOSED: 'text-ink-muted bg-paper-sunk',
-  APPROVED: 'text-ink-muted bg-paper-sunk',
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  APPLIED: 'applied',
+  FAILED: 'risk',
+  ROLLED_BACK: 'attention',
+  PROPOSED: 'neutral',
+  APPROVED: 'neutral',
 };
 
 type DiffRow = { field: string; from?: unknown; to?: unknown };
@@ -45,9 +45,7 @@ export default async function AuditPage() {
                       <span className="text-label text-ink-muted">
                         {a.platform} {'·'} {a.entityType} {'·'} {a.kind}
                       </span>
-                      <span className={cn('rounded-sm px-1.5 py-0.5 text-label', STATUS_STYLE[a.status] ?? '')}>
-                        {a.status.toLowerCase()}
-                      </span>
+                      <Badge variant={STATUS_VARIANT[a.status] ?? 'neutral'}>{a.status.toLowerCase()}</Badge>
                       <RiskBadge risk={a.riskBand as 'SAFE' | 'LOW' | 'MEDIUM' | 'HIGH'} />
                     </div>
                     <span className="font-data text-[11px] text-ink-faint">{a.externalEntityId}</span>

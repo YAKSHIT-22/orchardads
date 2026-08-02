@@ -1,6 +1,6 @@
-import * as React from 'react';
+import type * as React from 'react';
 import { cn } from '../cn';
-import { PLATFORM_COLOR } from '../cn';
+import { PLATFORM_COLOR, platformLabel } from '../cn';
 
 type Risk = 'SAFE' | 'LOW' | 'MEDIUM' | 'HIGH';
 
@@ -10,6 +10,31 @@ const RISK_STYLE: Record<Risk, string> = {
   MEDIUM: 'text-attention border-attention/40 bg-attention-wash',
   HIGH: 'text-risk border-risk/40 bg-risk-wash',
 };
+
+/** Generic status/label pill. Solid-tone variants share one shape across the app
+ *  (tool status, action status, etc.) so colour + spacing never drift page to page. */
+export type BadgeVariant = 'neutral' | 'iris' | 'applied' | 'attention' | 'risk';
+
+const BADGE_STYLE: Record<BadgeVariant, string> = {
+  neutral: 'bg-paper-sunk text-ink-muted',
+  iris: 'bg-iris-wash text-iris',
+  applied: 'bg-applied-wash text-applied',
+  attention: 'bg-attention-wash text-attention',
+  risk: 'bg-risk-wash text-risk',
+};
+
+export function Badge({
+  variant = 'neutral',
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement> & { variant?: BadgeVariant }) {
+  return (
+    <span
+      className={cn('inline-flex items-center rounded-sm px-1.5 py-0.5 text-label', BADGE_STYLE[variant], className)}
+      {...props}
+    />
+  );
+}
 
 /** Colour is never the only signal - the label carries the meaning too (sec 10). */
 export function RiskBadge({ risk, className }: { risk: Risk; className?: string }) {
@@ -39,7 +64,7 @@ export function PlatformChip({ platform, className }: { platform: string; classN
         style={{ background: PLATFORM_COLOR[platform] }}
         aria-hidden
       />
-      {platform.charAt(0) + platform.slice(1).toLowerCase()}
+      {platformLabel(platform)}
     </span>
   );
 }

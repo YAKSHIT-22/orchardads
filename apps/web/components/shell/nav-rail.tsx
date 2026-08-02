@@ -24,8 +24,14 @@ export function NavRail() {
       className="flex h-full w-[60px] shrink-0 flex-col items-center gap-1 border-r border-rule py-3"
       style={{ background: 'var(--console)' }}
     >
-      <Link href="/dashboard" className="mb-2 flex h-9 w-9 items-center justify-center" aria-label="OrchardAds home">
-        <span className="font-display text-lg text-white">O</span>
+      <Link
+        href="/dashboard"
+        className="mb-2 flex h-10 w-10 items-center justify-center"
+        aria-label="OrchardAds home"
+      >
+        <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-iris font-display text-sm text-white">
+          O
+        </span>
       </Link>
       {ITEMS.map((item) => {
         const active = pathname === item.href || pathname.startsWith(`${item.href}/`);

@@ -20,10 +20,10 @@ export default async function InboxPage() {
         <EmptyState
           icon={PlugZap}
           title="No account connected"
-          message="Connect a platform and run a sync; recommendations appear here once there is data to analyze."
+          message="Connect TikTok and run a sync; recommendations appear here once there is data to analyze."
           action={
             <Link href="/onboarding">
-              <Button>Connect a platform</Button>
+              <Button>Connect TikTok</Button>
             </Link>
           }
         />

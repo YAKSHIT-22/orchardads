@@ -367,22 +367,42 @@ const PAYLOAD_TO_TIKTOK: Record<string, string> = {
   name: 'adgroup_name',
 };
 
+const RESOURCE = { CAMPAIGN: 'campaign', AD_GROUP: 'adgroup', AD: 'ad' } as const;
+const ID_FIELD = { CAMPAIGN: 'campaign_id', AD_GROUP: 'adgroup_id', AD: 'ad_id' } as const;
+const IDS_FIELD = { CAMPAIGN: 'campaign_ids', AD_GROUP: 'adgroup_ids', AD: 'ad_ids' } as const;
+
 function writeCall(a: ApprovedAction, advertiserId: string): { path: string; body: Row } | null {
   const id = a.entityRef.externalId;
-  const t = a.entityRef.entityType;
-  const statusPath = t === 'CAMPAIGN' ? '/campaign/status/update/' : t === 'AD_GROUP' ? '/adgroup/status/update/' : '/ad/status/update/';
-  const idsField = t === 'CAMPAIGN' ? 'campaign_ids' : t === 'AD_GROUP' ? 'adgroup_ids' : 'ad_ids';
+  const t = a.entityRef.entityType as 'CAMPAIGN' | 'AD_GROUP' | 'AD';
+  const resource = RESOURCE[t] ?? 'adgroup';
+  const idField = ID_FIELD[t] ?? 'adgroup_id';
+  const idsField = IDS_FIELD[t] ?? 'adgroup_ids';
+  const statusPath = `/${resource}/status/update/`;
+  const updatePath = `/${resource}/update/`;
+  const base = { advertiser_id: advertiserId };
+
   switch (a.kind) {
     case 'PAUSE':
-      return { path: statusPath, body: { advertiser_id: advertiserId, [idsField]: [id], operation_status: 'DISABLE' } };
+      return { path: statusPath, body: { ...base, [idsField]: [id], operation_status: 'DISABLE' } };
     case 'RESUME':
-      return { path: statusPath, body: { advertiser_id: advertiserId, [idsField]: [id], operation_status: 'ENABLE' } };
+      return { path: statusPath, body: { ...base, [idsField]: [id], operation_status: 'ENABLE' } };
+    case 'DELETE':
+      return { path: statusPath, body: { ...base, [idsField]: [id], operation_status: 'DELETE' } };
     case 'SET_BUDGET':
-      return { path: '/adgroup/update/', body: { advertiser_id: advertiserId, adgroup_id: id, budget: a.proposedPayload.dailyBudgetMinor } };
+      return { path: updatePath, body: { ...base, [idField]: id, budget: a.proposedPayload.dailyBudgetMinor } };
     case 'SET_BID':
-      return { path: '/adgroup/update/', body: { advertiser_id: advertiserId, adgroup_id: id, bid_price: a.proposedPayload.bidMinor } };
+      return { path: updatePath, body: { ...base, [idField]: id, bid_price: a.proposedPayload.bidMinor } };
     case 'RENAME':
-      return { path: '/adgroup/update/', body: { advertiser_id: advertiserId, adgroup_id: id, adgroup_name: a.proposedPayload.name } };
+      return { path: updatePath, body: { ...base, [idField]: id, [`${resource}_name`]: a.proposedPayload.name } };
+    case 'UPDATE':
+      // Generic partial update: send only the provided TikTok-shaped fields.
+      return { path: updatePath, body: { ...base, [idField]: id, ...a.proposedPayload } };
+    case 'CREATE_CAMPAIGN':
+      return { path: '/campaign/create/', body: { ...base, ...a.proposedPayload } };
+    case 'CREATE_AD_GROUP':
+      return { path: '/adgroup/create/', body: { ...base, ...a.proposedPayload } };
+    case 'CREATE_AD':
+      return { path: '/ad/create/', body: { ...base, ...a.proposedPayload } };
     default:
       return null;
   }

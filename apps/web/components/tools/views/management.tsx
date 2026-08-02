@@ -8,6 +8,7 @@
  * per DESIGN_SYSTEM.md.
  */
 
+import { StudioSubmit } from '@/components/tools/studio-submit';
 import { useMemo, useState, type ReactNode } from 'react';
 import {
   Button,
@@ -234,6 +235,17 @@ function CampaignStudioView({ tool }: ToolViewProps) {
     [objectiveType, optimizationGoal, budgetMode, budgetAmount, bidType, locations, ageRanges, gender, placementType, adFormat, callToAction, destinationUrl],
   );
 
+  // Campaign-level draft (what TikTok's campaign/create takes + what the rules validate).
+  const campaignDraft = useMemo(
+    () => ({
+      campaign_name: `${objectiveType} campaign`,
+      objective_type: objectiveType,
+      budget_mode: budgetMode,
+      budget: budgetAmount,
+    }),
+    [objectiveType, budgetMode, budgetAmount],
+  );
+
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -415,7 +427,8 @@ function CampaignStudioView({ tool }: ToolViewProps) {
         {step === 'Review' && (
           <div className="flex flex-col gap-3">
             <p className="font-ui text-[13px] text-ink-muted">
-              Preview only - Campaign Studio does not submit to TikTok from this shell.
+              Every field combination is validated against TikTok live below. Submit is only enabled
+              when the combination is valid; creation routes through the approval + audit pipeline.
             </p>
             <Button variant="secondary" size="sm" className="w-fit gap-1.5" onClick={() => setPayloadOpen((o) => !o)}>
               {payloadOpen ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -426,6 +439,7 @@ function CampaignStudioView({ tool }: ToolViewProps) {
                 {JSON.stringify(payload, null, 2)}
               </pre>
             )}
+            <StudioSubmit campaignDraft={campaignDraft} />
           </div>
         )}
       </div>

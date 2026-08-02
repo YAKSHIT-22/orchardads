@@ -40,21 +40,39 @@ export function EmptyState({
   title,
   message,
   action,
+  secondaryAction,
+  className,
 }: {
   icon?: LucideIcon;
   title: string;
   /** Empty states are instructions, not dead ends (copy rules sec 9). */
   message: string;
   action?: React.ReactNode;
+  secondaryAction?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-rule bg-paper-sunk px-6 py-12 text-center">
-      {Icon && <Icon className="h-6 w-6 text-ink-faint" />}
+    <div
+      className={cn(
+        'flex flex-col items-center gap-3 rounded-md border border-rule bg-paper px-6 py-14 text-center',
+        className,
+      )}
+    >
+      {Icon && (
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-paper-sunk">
+          <Icon className="h-5 w-5 text-ink-faint" />
+        </span>
+      )}
       <div className="flex flex-col gap-1">
         <span className="font-display text-base text-ink">{title}</span>
-        <p className="max-w-md font-ui text-[13px] text-ink-muted">{message}</p>
+        <p className="max-w-md font-ui text-[13px] leading-5 text-ink-muted">{message}</p>
       </div>
-      {action}
+      {(action || secondaryAction) && (
+        <div className="mt-1 flex items-center gap-2">
+          {action}
+          {secondaryAction}
+        </div>
+      )}
     </div>
   );
 }
