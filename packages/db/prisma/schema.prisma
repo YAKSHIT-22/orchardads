@@ -51,11 +51,34 @@ model Workspace {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now()) @db.Timestamptz
-  members   Member[]
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  members       Member[]
+  tokens        AuthToken[]
+}
+
+enum AuthTokenKind {
+  EMAIL_OTP
+  PASSWORD_RESET
+}
+
+/// Short-lived one-time codes/tokens for email verification and password reset.
+model AuthToken {
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @db.Uuid
+  kind      AuthTokenKind
+  codeHash  String
+  expiresAt DateTime      @db.Timestamptz
+  consumed  Boolean       @default(false)
+  createdAt DateTime      @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind])
 }
 
 model Member {

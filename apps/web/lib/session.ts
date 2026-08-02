@@ -47,6 +47,12 @@ export async function setWorkspaceSession(ctx: WorkspaceContext): Promise<void> 
   });
 }
 
+/** Clear the session cookie (sign out). */
+export async function clearSession(): Promise<void> {
+  const jar = await cookies();
+  jar.delete(COOKIE);
+}
+
 export function isDbConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
 }

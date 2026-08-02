@@ -1,75 +1,158 @@
 'use client';
 
+import { toolsByCategory } from '@/lib/tools-registry';
 import { cn } from '@adsos/ui';
-import { Building2, History, LayoutGrid, ListChecks, Settings, Sparkles, type LucideIcon } from 'lucide-react';
+import {
+  Building2,
+  ChevronDown,
+  History,
+  ListChecks,
+  type LucideIcon,
+  Settings,
+  Sparkles,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
-const ITEMS: NavItem[] = [
-  { href: '/dashboard', label: 'Morning Brief', icon: Sparkles },
+const TOP_ITEMS: NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: Sparkles },
   { href: '/inbox', label: 'Recommendation Inbox', icon: ListChecks },
-  { href: '/tools', label: 'Tools', icon: LayoutGrid },
-  { href: '/audit', label: 'Activity', icon: History },
-  { href: '/accounts', label: 'Accounts', icon: Building2 },
 ];
 
-/** 60px icon-only rail. Labels on hover. Horizontal space belongs to data (sec 6). */
+const BOTTOM_ITEMS: NavItem[] = [
+  { href: '/audit', label: 'Activity', icon: History },
+  { href: '/accounts', label: 'Accounts', icon: Building2 },
+  { href: '/settings', label: 'Settings', icon: Settings },
+];
+
+function NavLink({ href, label, icon: Icon, active }: NavItem & { active: boolean }) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'flex items-center gap-2.5 rounded-md px-2.5 py-[7px] font-ui text-[13px] font-medium transition-colors',
+        active
+          ? 'bg-sidebar-accent text-sidebar-primary'
+          : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className="truncate">{label}</span>
+    </Link>
+  );
+}
+
+/**
+ * Full left sidebar, ported from handyAds's shell (structure + spacing),
+ * re-skinned to our tokens. Unlike handyAds's 144px icon rail + fly-out
+ * panel, everything lives in one scrollable column so every tool is a
+ * single click away and the URL structure stays obvious. Tool categories
+ * are collapsible disclosures - the category holding the active route
+ * starts open, everything else starts closed, so the long tool catalog
+ * doesn't force a wall of scrolling on first load.
+ */
 export function NavRail() {
   const pathname = usePathname();
+  const groups = toolsByCategory();
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
+  const [openCategories, setOpenCategories] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    for (const g of groups) {
+      const href = (t: (typeof g.tools)[number]) => t.href ?? `/tools/${t.slug}`;
+      if (g.tools.some((t) => isActive(href(t)))) initial.add(g.category);
+    }
+    return initial;
+  });
+
+  function toggleCategory(category: string) {
+    setOpenCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  }
+
   return (
-    <nav
+    <aside
       aria-label="Primary"
-      className="flex h-full w-[60px] shrink-0 flex-col items-center gap-1 border-r border-rule py-3"
-      style={{ background: 'var(--console)' }}
+      className="flex h-full w-60 shrink-0 flex-col border-r"
+      style={{ background: 'var(--sidebar)', borderColor: 'var(--sidebar-border)' }}
     >
-      <Link
-        href="/dashboard"
-        className="mb-2 flex h-10 w-10 items-center justify-center"
-        aria-label="OrchardAds home"
-      >
-        <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-iris font-display text-sm text-white">
-          O
-        </span>
-      </Link>
-      {ITEMS.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            title={item.label}
-            aria-label={item.label}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'group relative flex h-10 w-10 items-center justify-center rounded-md transition-colors',
-              active ? 'text-white' : 'text-white/55 hover:text-white',
-            )}
-            style={active ? { background: 'var(--console-alt)' } : undefined}
-          >
-            <Icon className="h-[18px] w-[18px]" />
-            {active && (
-              <span
-                className="absolute left-0 top-1/2 h-5 -translate-y-1/2 rounded-r"
-                style={{ width: 3, background: 'var(--iris)' }}
-                aria-hidden
-              />
-            )}
-          </Link>
-        );
-      })}
-      <div className="mt-auto">
-        <Link
-          href="/settings"
-          title="Settings"
-          aria-label="Settings"
-          className="flex h-10 w-10 items-center justify-center rounded-md text-white/55 hover:text-white"
-        >
-          <Settings className="h-[18px] w-[18px]" />
+      <div className="flex items-center gap-2 px-4 py-4">
+        <Link href="/dashboard" className="flex items-center gap-2" aria-label="OrchardAds home">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-iris font-display text-[13px] text-white">
+            O
+          </span>
+          <span className="font-display text-[15px] text-sidebar-foreground">OrchardAds</span>
         </Link>
       </div>
-    </nav>
+
+      {/* Scrollable so the full tool catalog fits without pushing Settings offscreen. */}
+      <nav className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-3 pb-4">
+        <div className="flex flex-col gap-0.5">
+          {TOP_ITEMS.map((item) => (
+            <NavLink key={item.href} {...item} active={isActive(item.href)} />
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-0.5">
+          <span className="px-2.5 pb-1 text-label text-sidebar-foreground/45">Tools</span>
+          {groups.map((g) => {
+            const open = openCategories.has(g.category);
+            const panelId = `nav-group-${g.category.toLowerCase().replace(/\s+/g, '-')}`;
+            return (
+              <div key={g.category} className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => toggleCategory(g.category)}
+                  aria-expanded={open}
+                  aria-controls={panelId}
+                  className="flex items-center justify-between rounded-md px-2.5 py-1.5 font-ui text-[12px] font-semibold text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                >
+                  <span>{g.category}</span>
+                  <ChevronDown
+                    className={cn(
+                      'h-3.5 w-3.5 shrink-0 transition-transform',
+                      open ? 'rotate-0' : '-rotate-90',
+                    )}
+                  />
+                </button>
+                {open && (
+                  <div id={panelId} className="flex flex-col gap-0.5 pl-2">
+                    {g.tools.map((tool) => {
+                      const href = tool.href ?? `/tools/${tool.slug}`;
+                      return (
+                        <NavLink
+                          key={tool.slug}
+                          href={href}
+                          label={tool.name}
+                          icon={tool.icon}
+                          active={isActive(href)}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div
+          className="mt-auto flex flex-col gap-0.5 border-t pt-3"
+          style={{ borderColor: 'var(--sidebar-border)' }}
+        >
+          {BOTTOM_ITEMS.map((item) => (
+            <NavLink key={item.href} {...item} active={isActive(item.href)} />
+          ))}
+        </div>
+      </nav>
+    </aside>
   );
 }

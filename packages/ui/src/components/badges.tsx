@@ -1,3 +1,4 @@
+import { Slot } from '@radix-ui/react-slot';
 import type * as React from 'react';
 import { cn } from '../cn';
 import { PLATFORM_COLOR, platformLabel } from '../cn';
@@ -25,11 +26,13 @@ const BADGE_STYLE: Record<BadgeVariant, string> = {
 
 export function Badge({
   variant = 'neutral',
+  asChild = false,
   className,
   ...props
-}: React.HTMLAttributes<HTMLSpanElement> & { variant?: BadgeVariant }) {
+}: React.HTMLAttributes<HTMLSpanElement> & { variant?: BadgeVariant; asChild?: boolean }) {
+  const Comp = asChild ? Slot : 'span';
   return (
-    <span
+    <Comp
       className={cn('inline-flex items-center rounded-sm px-1.5 py-0.5 text-label', BADGE_STYLE[variant], className)}
       {...props}
     />
