@@ -1,5 +1,6 @@
 'use client';
 
+import { Logo } from '@/components/brand/logo';
 import { toolsByCategory } from '@/lib/tools-registry';
 import { cn } from '@adsos/ui';
 import {
@@ -85,12 +86,7 @@ export function NavRail() {
       style={{ background: 'var(--sidebar)', borderColor: 'var(--sidebar-border)' }}
     >
       <div className="flex items-center gap-2 px-4 py-4">
-        <Link href="/dashboard" className="flex items-center gap-2" aria-label="OrchardAds home">
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-iris font-display text-[13px] text-white">
-            O
-          </span>
-          <span className="font-display text-[15px] text-sidebar-foreground">OrchardAds</span>
-        </Link>
+        <Logo href="/dashboard" width={124} className="h-7 w-auto" />
       </div>
 
       {/* Scrollable so the full tool catalog fits without pushing Settings offscreen. */}

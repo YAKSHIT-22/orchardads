@@ -1,5 +1,5 @@
 import { AuthShowcase } from '@/components/auth/auth-showcase';
-import Link from 'next/link';
+import { Logo } from '@/components/brand/logo';
 import { Toaster } from 'sonner';
 
 /**
@@ -12,12 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-screen w-full bg-paper">
       <div className="flex w-full flex-col justify-center px-6 py-10 sm:px-10 md:w-1/2 lg:px-16">
         <div className="mx-auto flex w-full max-w-sm flex-col gap-8">
-          <Link href="/" className="flex items-center gap-2" aria-label="OrchardAds home">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-iris font-display text-sm text-white">
-              O
-            </span>
-            <span className="font-display text-[17px] text-ink">OrchardAds</span>
-          </Link>
+          <Logo width={144} className="h-8 w-auto" />
           {children}
         </div>
       </div>

@@ -66,12 +66,15 @@ function halfDelta(
   return { value: `${Math.abs(pct).toFixed(1)}%`, direction, desirable: lowerIsBetter ? !rising : rising };
 }
 
-/** One platform's dashboard: engine output over synced facts. PERSIST platforms read
- *  budgets/names from the DB; PROXY_ONLY (Pinterest) reads them from the short-TTL
- *  Redis cache written during sync (storage rule, ARCHITECTURE.md sec 5.4). */
-export async function getPlatformDashboard(platform: Platform, ctx: WorkspaceContext): Promise<PlatformDashboard> {
+/** Build the normalized AccountContext for a platform from the synced store.
+ *  Returns null when nothing is connected. Shared by the dashboard and the
+ *  per-tool data provider so every tool reads the same numbers. */
+export async function loadAccountContext(
+  platform: Platform,
+  ctx: WorkspaceContext,
+): Promise<{ accountContext: AccountContext; externalIds: Map<string, string> } | null> {
   const accounts = await repositories.sync.listAccountRecords(ctx, platform);
-  if (accounts.length === 0) return { platform, connected: false, kpis: [], recs: [], trackingHealth: 'UNKNOWN' };
+  if (accounts.length === 0) return null;
 
   const persist = retentionFor(platform, 'CAMPAIGN') === 'PERSIST';
   const since = new Date(Date.now() - WINDOW_DAYS * 86_400_000).toISOString();
@@ -112,15 +115,24 @@ export async function getPlatformDashboard(platform: Platform, ctx: WorkspaceCon
     ? (await Promise.all(accounts.map((a) => repositories.sync.missingPixelAdGroupIds(ctx, a.id)))).flat()
     : [];
 
-  const entities = groupByEntity(allRows, names, platform);
   const accountContext: AccountContext = {
     platform,
     currency: allRows[0]?.currency ?? 'USD',
-    entities,
+    entities: groupByEntity(allRows, names, platform),
     budgets: budgetMap,
     trackingHealth,
     missingPixelEntityIds: missing,
   };
+  return { accountContext, externalIds };
+}
+
+/** One platform's dashboard: engine output over synced facts. */
+export async function getPlatformDashboard(platform: Platform, ctx: WorkspaceContext): Promise<PlatformDashboard> {
+  const loaded = await loadAccountContext(platform, ctx);
+  if (!loaded) return { platform, connected: false, kpis: [], recs: [], trackingHealth: 'UNKNOWN' };
+  const { accountContext, externalIds } = loaded;
+  const trackingHealth = accountContext.trackingHealth;
+  const allRows = accountContext.entities.flatMap((e) => e.daily);
 
   const recs = runRecommendations(accountContext).map((d) =>
     draftToLedger(d, { externalId: externalIds.get(d.entityId) ?? d.entityId }),

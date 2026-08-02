@@ -1,3 +1,4 @@
+import { Logo } from '@/components/brand/logo';
 import Link from 'next/link';
 
 const COLS: { title: string; links: [string, string][] }[] = [
@@ -20,12 +21,7 @@ export function MarketingFooter() {
     <footer className="mt-auto w-full border-t border-rule bg-paper-sunk">
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-12 sm:px-10 sm:flex-row sm:justify-between">
         <div className="flex max-w-xs flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-iris font-display text-sm text-white">
-              O
-            </span>
-            <span className="font-display text-[15px] text-ink">OrchardAds</span>
-          </div>
+          <Logo width={128} className="h-7 w-auto" />
           <p className="font-ui text-[13px] leading-5 text-ink-muted">
             The AI media-buyer and creator OS for TikTok Ads: diagnostics, safe one-click
             changes, and Spark Ads - without a cut of your spend.
