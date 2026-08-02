@@ -348,3 +348,81 @@ export function ChartPlaceholder({
     </div>
   );
 }
+
+// -- Generic tool-data rendering --
+// One shared shape every cluster view's `data` prop (apps/web's ToolData,
+// computed from the synced store) is rendered through, so a real-data table
+// and its stat row look identical across all 5 clusters instead of five
+// drifting copies. Structural typing only - this package does not import
+// apps/web's lib/tools/data.ts (it is server-only and app-scoped).
+
+export type ToolDataStat = { label: string; value: string; sub?: string; tone?: StatTone };
+export type ToolDataColumn = { key: string; label: string; numeric?: boolean };
+export type ToolDataRowTone = 'neutral' | 'attention' | 'risk' | 'positive';
+export type ToolDataRow = { id: string; cells: Record<string, string | number>; tone?: ToolDataRowTone };
+
+/** Real-data stat row - maps `data.stats` straight into StatTile, tone and
+ *  all. Use PlaceholderStats-style dash tiles instead while `data` is absent
+ *  or the connected account has no rows yet. */
+export function ToolStats({ stats, className }: { stats: ToolDataStat[]; className?: string }) {
+  return (
+    <StatGrid className={className}>
+      {stats.map((s) => (
+        <StatTile key={s.label} label={s.label} value={s.value} sub={s.sub} tone={s.tone ?? 'neutral'} />
+      ))}
+    </StatGrid>
+  );
+}
+
+const ROW_TONE_ACCENT: Record<ToolDataRowTone, string> = {
+  neutral: '',
+  positive: 'border-l-2 border-applied text-applied',
+  attention: 'border-l-2 border-attention text-attention',
+  risk: 'border-l-2 border-risk text-risk',
+};
+
+/** Real-data table built from `data.columns` + `data.rows`. Renders an
+ *  EmptyRow with `emptyMessage` when there are no rows yet (connected but
+ *  nothing synced), so the same component covers both the populated and the
+ *  connected-but-empty state - callers only branch on which columns/rows to
+ *  pass in. */
+export function ToolDataTable({
+  columns,
+  rows,
+  emptyMessage,
+  className,
+}: {
+  columns: ToolDataColumn[];
+  rows: ToolDataRow[];
+  emptyMessage: string;
+  className?: string;
+}) {
+  return (
+    <DataGrid className={className}>
+      <THead>
+        <TR>
+          {columns.map((c) => (
+            <TH key={c.key} numeric={c.numeric}>
+              {c.label}
+            </TH>
+          ))}
+        </TR>
+      </THead>
+      <tbody>
+        {rows.length === 0 ? (
+          <EmptyRow cols={columns.length}>{emptyMessage}</EmptyRow>
+        ) : (
+          rows.map((r) => (
+            <TR key={r.id}>
+              {columns.map((c, i) => (
+                <TD key={c.key} numeric={c.numeric} className={i === 0 ? ROW_TONE_ACCENT[r.tone ?? 'neutral'] : undefined}>
+                  {r.cells[c.key] ?? '-'}
+                </TD>
+              ))}
+            </TR>
+          ))
+        )}
+      </tbody>
+    </DataGrid>
+  );
+}
