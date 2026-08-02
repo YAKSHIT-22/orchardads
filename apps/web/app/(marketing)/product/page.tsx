@@ -1,11 +1,5 @@
 import { TOOLS, type ToolDef, toolsByCategory } from '@/lib/tools-registry';
-import { cn } from '@adsos/ui';
-
-const STATUS_STYLE: Record<ToolDef['status'], string> = {
-  live: 'text-applied bg-applied-wash',
-  soon: 'text-ink-muted bg-paper-sunk',
-  gated: 'text-attention bg-attention-wash',
-};
+// (cn import removed - unused)
 
 const CATEGORY_NOTE: Partial<Record<ToolDef['category'], string>> = {
   Creators: 'Discover, brief, and track creators - the CRM sits next to your ad account, not apart from it.',
@@ -38,7 +32,6 @@ function ScopeTags({ scopes }: { scopes?: string[] }) {
 
 function ToolCard({ t }: { t: ToolDef }) {
   const Icon = t.icon;
-  const platforms = t.platforms === 'ALL' ? 'All platforms' : t.platforms.join(', ');
   return (
     <div className="flex flex-col gap-2 rounded-2xl border border-rule bg-paper p-4">
       <div className="flex items-start justify-between gap-2">
@@ -49,15 +42,14 @@ function ToolCard({ t }: { t: ToolDef }) {
           {t.combination && (
             <span className="rounded-sm bg-iris-wash px-1.5 py-0.5 text-label text-iris">combo</span>
           )}
-          <span className={cn('rounded-sm px-1.5 py-0.5 text-label', STATUS_STYLE[t.status])}>{t.status}</span>
+          {t.status === 'live' && (
+            <span className="rounded-sm bg-applied-wash px-1.5 py-0.5 text-label text-applied">live</span>
+          )}
         </div>
       </div>
       <span className="font-ui text-[13px] font-semibold text-ink">{t.name}</span>
       <p className="font-ui text-[12px] leading-4 text-ink-muted">{t.description}</p>
       <ScopeTags scopes={t.scopes} />
-      <span className="mt-auto font-data text-[10px] text-ink-faint">
-        {platforms} - phase {t.phase}
-      </span>
     </div>
   );
 }

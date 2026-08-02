@@ -24,9 +24,11 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.17 0.012 250);
 
-  /* ── Brand accent: refined cyan/teal. Used only for "the next action". */
-  --primary: oklch(0.58 0.13 210);
+  /* ── Brand accent: TikTok cyan (a deeper, usable form of #25F4EE), not teal.
+       Used for "the next action". Pink (#FE2C55) is the secondary accent below. */
+  --primary: oklch(0.64 0.15 200);
   --primary-foreground: oklch(1 0 0);
+  --tt-pink: oklch(0.64 0.23 12);
 
   --secondary: oklch(0.95 0.004 250);
   --secondary-foreground: oklch(0.17 0.012 250);
@@ -35,31 +37,31 @@
   --muted-foreground: oklch(0.5 0.012 250);
 
   /* accent = light teal tint - hover surfaces, never full chrome. */
-  --accent: oklch(0.94 0.025 210);
+  --accent: oklch(0.95 0.03 200);
   --accent-foreground: oklch(0.17 0.012 250);
 
   --destructive: oklch(0.57 0.22 25.3);
 
   --border: oklch(0.9 0.005 250);
   --input: oklch(0.9 0.005 250);
-  --ring: oklch(0.58 0.13 210);
+  --ring: oklch(0.64 0.15 200);
 
   /* Cyan/teal-led ramp; chart-2 nods to TikTok pink, never used for chrome. */
-  --chart-1: oklch(0.58 0.13 210);
-  --chart-2: oklch(0.62 0.2 15);
+  --chart-1: oklch(0.64 0.15 200);
+  --chart-2: oklch(0.64 0.23 12);
   --chart-3: oklch(0.72 0.17 55);
   --chart-4: oklch(0.5 0.02 250);
-  --chart-5: oklch(0.4 0.09 205);
+  --chart-5: oklch(0.5 0.12 200);
 
   /* ── Sidebar: very light cool gray-white, not tinted violet/teal. ── */
   --sidebar: oklch(0.985 0.003 250);
   --sidebar-foreground: oklch(0.17 0.012 250);
-  --sidebar-primary: oklch(0.58 0.13 210);
+  --sidebar-primary: oklch(0.64 0.15 200);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.93 0.025 210);
+  --sidebar-accent: oklch(0.95 0.03 200);
   --sidebar-accent-foreground: oklch(0.17 0.012 250);
   --sidebar-border: oklch(0.9 0.005 250);
-  --sidebar-ring: oklch(0.58 0.13 210);
+  --sidebar-ring: oklch(0.64 0.15 200);
 
   /* ── OrchardAds legacy tokens (DESIGN_SYSTEM.md), aliased onto the ──
      shadcn palette above so every existing class keeps working. */
@@ -73,9 +75,9 @@
 
   /* --iris = the "next action" accent -> the cyan/teal primary above. */
   --iris: var(--primary);
-  --iris-hover: oklch(0.51 0.14 210);
+  --iris-hover: oklch(0.57 0.16 200);
   --iris-wash: var(--accent);
-  --iris-edge: oklch(0.78 0.07 210);
+  --iris-edge: oklch(0.8 0.09 200);
 
   /* State colours - desaturated so the platform rail stays loudest. */
   --applied: oklch(0.52 0.11 155);
@@ -87,7 +89,7 @@
 
   /* Platform identity. ONLY in 3px rails and chips - brighter/more
      saturated than --primary so the two cyans stay distinguishable. */
-  --p-tiktok: oklch(0.7 0.14 200);
+  --p-tiktok: oklch(0.82 0.14 195);
 
   /* ── Diff semantics (the signature component) ───────── */
   --diff-from-bg: oklch(0.965 0.02 30);
@@ -167,6 +169,7 @@
   --color-risk: var(--risk);
   --color-risk-wash: var(--risk-wash);
   --color-p-tiktok: var(--p-tiktok);
+  --color-tt-pink: var(--tt-pink);
 
   --radius-sm: var(--r-sm);
   --radius-md: var(--r-md);

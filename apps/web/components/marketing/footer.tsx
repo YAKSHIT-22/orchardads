@@ -26,12 +26,6 @@ export function MarketingFooter() {
             The AI media-buyer and creator OS for TikTok Ads: diagnostics, safe one-click
             changes, and Spark Ads - without a cut of your spend.
           </p>
-          <span
-            className="flex w-fit items-center gap-1.5 border-l-[3px] bg-paper px-2 py-0.5"
-            style={{ borderLeftColor: 'var(--p-tiktok)', borderRadius: 'var(--r-sm)' }}
-          >
-            <span className="font-data text-[10px] font-medium text-ink-muted">TikTok Ads - Live</span>
-          </span>
         </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4 sm:gap-10">
           {COLS.map((c) => (

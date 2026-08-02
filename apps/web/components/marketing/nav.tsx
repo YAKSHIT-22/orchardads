@@ -15,12 +15,6 @@ export function MarketingNav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 sm:px-10">
         <div className="flex items-center gap-3">
           <Logo width={128} className="h-7 w-auto" />
-          <span
-            className="hidden items-center gap-1.5 border-l-[3px] bg-paper-sunk px-2 py-0.5 sm:flex"
-            style={{ borderLeftColor: 'var(--p-tiktok)', borderRadius: 'var(--r-sm)' }}
-          >
-            <span className="font-data text-[10px] font-medium text-ink-muted">TikTok Ads</span>
-          </span>
         </div>
         <nav className="hidden items-center gap-7 md:flex">
           {LINKS.map((l) => (

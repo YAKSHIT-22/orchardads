@@ -74,6 +74,8 @@ export default function Landing() {
   const economicsTools = ECONOMICS_SLUGS.map((slug) => toolBySlug(slug)).filter(
     (t): t is NonNullable<typeof t> => Boolean(t),
   );
+  const featuredCreatorTool = creatorTools.find((t) => t.combination) ?? creatorTools[0];
+  const restCreatorTools = creatorTools.filter((t) => t.slug !== featuredCreatorTool?.slug);
 
   return (
     <main className="flex w-full flex-col">
@@ -117,14 +119,6 @@ export default function Landing() {
               </Button>
             </Link>
           </div>
-
-          <span
-            className="mt-1 flex w-fit items-center gap-2 border-l-[3px] bg-paper-sunk px-3 py-1.5"
-            style={{ borderLeftColor: 'var(--p-tiktok)', borderRadius: 'var(--r-sm)' }}
-          >
-            <span className="font-ui text-[13px] font-semibold text-ink">TikTok Ads</span>
-            <span className="font-data text-[10px] text-applied">Live</span>
-          </span>
 
           {/* stat strip */}
           <div className="mt-4 grid w-full max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-rule bg-rule sm:grid-cols-4">
@@ -260,14 +254,14 @@ export default function Landing() {
               Live in four steps.
             </h2>
           </div>
-          <div className="relative grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="relative grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
             <div
               aria-hidden
-              className="absolute top-5 left-[12%] right-[12%] hidden h-px bg-gradient-to-r from-transparent via-rule to-transparent lg:block"
+              className="absolute top-6 left-[10%] right-[10%] hidden h-0.5 rounded-full bg-iris/20 lg:block"
             />
             {STEPS.map((s) => (
-              <div key={s.step} className="relative flex flex-col gap-3">
-                <div className="z-10 flex h-10 w-10 items-center justify-center rounded-full border border-rule bg-paper font-data text-sm font-semibold text-iris shadow-xs">
+              <div key={s.step} className="relative flex flex-col gap-3 rounded-2xl border border-rule bg-paper p-5 lg:border-0 lg:bg-transparent lg:p-0">
+                <div className="z-10 flex h-12 w-12 items-center justify-center rounded-2xl bg-iris font-data text-base font-bold text-white shadow-md shadow-iris/25">
                   {s.step}
                 </div>
                 <h3 className="font-ui text-[15px] font-semibold text-ink">{s.title}</h3>
@@ -308,39 +302,38 @@ export default function Landing() {
               </span>
             ))}
           </div>
+          {/* Flagship combination tool, featured full-width. */}
+          {featuredCreatorTool && (
+            <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-iris-edge bg-iris-wash/40 p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-paper text-iris">
+                  <featuredCreatorTool.icon className="h-5 w-5" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-ui text-[15px] font-semibold text-ink">{featuredCreatorTool.name}</span>
+                    <span className="rounded-full bg-paper px-2 py-0.5 font-ui text-[10px] font-semibold uppercase tracking-wide text-iris">
+                      combo
+                    </span>
+                  </div>
+                  <p className="max-w-[68ch] font-ui text-[13px] leading-5 text-ink-muted">
+                    {featuredCreatorTool.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Remaining creator tools + economics, one even grid. */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {creatorTools.map((t) => {
+            {[...restCreatorTools, ...economicsTools].map((t) => {
               const Icon = t.icon;
               return (
                 <div key={t.slug} className="flex flex-col gap-2 rounded-2xl border border-rule bg-paper p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-iris-wash text-iris">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    {t.combination && (
-                      <span className="rounded-full bg-iris-wash px-2 py-0.5 font-ui text-[10px] font-semibold uppercase tracking-wide text-iris">
-                        combo
-                      </span>
-                    )}
-                  </div>
-                  <span className="font-ui text-sm font-semibold text-ink">{t.name}</span>
-                  <p className="font-ui text-[13px] leading-5 text-ink-muted">{t.description}</p>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {economicsTools.map((t) => {
-              const Icon = t.icon;
-              return (
-                <div key={t.slug} className="flex items-start gap-3 rounded-2xl border border-rule bg-paper p-5">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-iris-wash text-iris">
                     <Icon className="h-4 w-4" />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="font-ui text-sm font-semibold text-ink">{t.name}</span>
-                    <p className="font-ui text-[13px] leading-5 text-ink-muted">{t.description}</p>
-                  </div>
+                  <span className="font-ui text-sm font-semibold text-ink">{t.name}</span>
+                  <p className="font-ui text-[13px] leading-5 text-ink-muted">{t.description}</p>
                 </div>
               );
             })}
