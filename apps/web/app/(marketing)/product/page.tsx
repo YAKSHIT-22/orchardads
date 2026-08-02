@@ -40,9 +40,9 @@ function ToolCard({ t }: { t: ToolDef }) {
   const Icon = t.icon;
   const platforms = t.platforms === 'ALL' ? 'All platforms' : t.platforms.join(', ');
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-rule bg-paper p-3">
+    <div className="flex flex-col gap-2 rounded-2xl border border-rule bg-paper p-4">
       <div className="flex items-start justify-between gap-2">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-iris-wash text-iris">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-iris-wash text-iris">
           <Icon className="h-4 w-4" />
         </div>
         <div className="flex items-center gap-1.5">
@@ -68,13 +68,13 @@ export default function ProductPage() {
   const liveCount = TOOLS.filter((t) => t.status === 'live').length;
 
   return (
-    <main className="mx-auto flex max-w-[1120px] flex-col gap-14 px-6 py-16">
+    <main className="mx-auto flex max-w-6xl flex-col gap-14 px-6 py-16 sm:px-10 sm:py-20">
       <header className="flex flex-col gap-3">
-        <span className="text-label text-iris">Product</span>
-        <h1 className="max-w-[24ch] font-display text-[clamp(1.8rem,4vw,2.6rem)] leading-tight text-ink">
+        <span className="font-ui text-[11px] font-semibold uppercase tracking-[0.22em] text-iris/80">Product</span>
+        <h1 className="max-w-[24ch] font-display text-4xl leading-tight tracking-[-0.02em] text-ink sm:text-5xl">
           Every TikTok tool, one normalized store, one action engine.
         </h1>
-        <p className="max-w-[64ch] font-ui text-[14px] leading-6 text-ink-muted">
+        <p className="max-w-[64ch] font-ui text-[15px] leading-6 text-ink-muted">
           The moat is not "AI optimizes TikTok Ads" - TikTok's own console already does some of
           that. It is independent diagnostics across the whole TikTok API surface, a normalized
           store, safe one-click actions with a full audit trail, and a creator + Spark Ads
@@ -108,10 +108,10 @@ export default function ProductPage() {
             return (
               <div
                 key={t.slug}
-                className="flex flex-col gap-2 rounded-md border border-iris-edge bg-iris-wash/40 p-4"
+                className="flex flex-col gap-2 rounded-2xl border border-iris-edge bg-iris-wash/40 p-4"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-paper text-iris">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-paper text-iris">
                     <Icon className="h-4 w-4" />
                   </div>
                   <span className="rounded-sm bg-paper px-1.5 py-0.5 text-label text-iris">

@@ -2,8 +2,19 @@ import { RecLedger } from '@/components/inbox/rec-ledger';
 import { SyncButton } from '@/components/sync-button';
 import { getWorkspaceDashboard } from '@/lib/data/platform';
 import { getWorkspaceContext } from '@/lib/session';
-import { Button, Card, CardContent, CardHeader, CardTitle, EmptyState, MetricStat, PlatformChip, SyncStatus } from '@adsos/ui';
-import { PlugZap } from 'lucide-react';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  EmptyState,
+  MetricStat,
+  PlatformChip,
+  StatGrid,
+  StatTile,
+  SyncStatus,
+} from '@adsos/ui';
+import { AlertTriangle, ListChecks, PlugZap, Radio, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 const HEALTH_TONE = { HEALTHY: 'fresh', DEGRADED: 'stale', BROKEN: 'failed', UNKNOWN: 'stale' } as const;
@@ -13,8 +24,11 @@ export default async function DashboardPage() {
   const data = ctx ? await getWorkspaceDashboard(ctx) : null;
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
 
+  const highRisk = data?.recs.filter((r) => r.risk === 'HIGH' || r.risk === 'MEDIUM').length ?? 0;
+  const trackingIssues = data?.platforms.filter((p) => p.trackingHealth !== 'HEALTHY').length ?? 0;
+
   return (
-    <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-6 py-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 sm:px-10">
       <header className="flex items-end justify-between">
         <div className="flex flex-col gap-1">
           <span className="text-label text-ink-muted">{today}</span>
@@ -38,6 +52,31 @@ export default async function DashboardPage() {
         />
       ) : (
         <>
+          <StatGrid>
+            <StatTile icon={Radio} label="Connected accounts" value={String(data.connectedPlatforms.length)} tone="iris" />
+            <StatTile
+              icon={ListChecks}
+              label="Needs attention"
+              value={String(data.recs.length)}
+              sub="across all recommendations"
+              tone={data.recs.length > 0 ? 'attention' : 'positive'}
+            />
+            <StatTile
+              icon={AlertTriangle}
+              label="Medium/high risk"
+              value={String(highRisk)}
+              sub="review before applying"
+              tone={highRisk > 0 ? 'risk' : 'neutral'}
+            />
+            <StatTile
+              icon={ShieldCheck}
+              label="Tracking issues"
+              value={String(trackingIssues)}
+              sub={`of ${data.platforms.length} connected`}
+              tone={trackingIssues > 0 ? 'attention' : 'positive'}
+            />
+          </StatGrid>
+
           {data.platforms.map((p) => (
             <Card key={p.platform} platform={p.platform}>
               <CardHeader className="flex-row items-center justify-between">
@@ -57,7 +96,7 @@ export default async function DashboardPage() {
             </Card>
           ))}
 
-          <section className="flex w-full max-w-[720px] flex-col gap-3">
+          <section className="flex w-full max-w-4xl flex-col gap-3">
             <div className="flex items-center justify-between">
               <h2 className="text-label text-ink-muted">Needs attention</h2>
               <span className="font-data text-[11px] text-ink-faint">{data.recs.length} items</span>

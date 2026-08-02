@@ -21,3 +21,8 @@ export * from './components/tooltip';
 export * from './components/dialog';
 export * from './components/dropdown-menu';
 export * from './components/table';
+export * from './components/sparkline';
+export * from './components/trend-chart';
+export * from './components/checkbox';
+export * from './components/bulk-action-bar';
+export * from './components/pagination';

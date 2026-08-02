@@ -18,7 +18,14 @@ import {
   TH,
   TD,
   EmptyRow,
-  cn,
+  Segmented,
+  DatePreset,
+  ContextLine,
+  Checkbox,
+  BulkActionBar,
+  TrendChart,
+  Button,
+  type DateRangeValue,
 } from '@adsos/ui';
 import {
   ScanSearch,
@@ -49,72 +56,14 @@ import {
   Plus,
   Zap,
   ArrowLeftRight,
+  Ban,
   type LucideIcon,
 } from 'lucide-react';
 import type { ToolViewMap, ToolViewProps } from './_registry';
 
-// -- Local shell atoms (kept file-scoped; see management.tsx for its own copy) --
-
-type RangeValue = '7d' | '30d' | '90d';
-const RANGE_OPTIONS: RangeValue[] = ['7d', '30d', '90d'];
-
-function RangeTabs({ value, onChange }: { value: RangeValue; onChange: (v: RangeValue) => void }) {
-  return (
-    <div className="inline-flex rounded-md border border-rule p-0.5" role="tablist" aria-label="Date range">
-      {RANGE_OPTIONS.map((o) => (
-        <button
-          key={o}
-          type="button"
-          role="tab"
-          aria-selected={value === o}
-          onClick={() => onChange(o)}
-          className={cn(
-            'rounded-sm px-3 py-1 font-ui text-[12px] font-medium transition-colors',
-            value === o ? 'bg-iris text-white' : 'text-ink-muted hover:text-ink',
-          )}
-        >
-          {o}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-  ariaLabel,
-}: {
-  options: { value: T; label: string }[];
-  value: T;
-  onChange: (v: T) => void;
-  ariaLabel: string;
-}) {
-  return (
-    <div className="inline-flex rounded-md border border-rule p-0.5" role="tablist" aria-label={ariaLabel}>
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          role="tab"
-          aria-selected={value === o.value}
-          onClick={() => onChange(o.value)}
-          className={cn(
-            'rounded-sm px-3 py-1 font-ui text-[12px] font-medium transition-colors',
-            value === o.value ? 'bg-iris text-white' : 'text-ink-muted hover:text-ink',
-          )}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ContextLine({ children }: { children: ReactNode }) {
-  return <p className="max-w-2xl font-ui text-[13px] text-ink-muted">{children}</p>;
-}
+// -- Local shell atoms --
+// Segmented/DatePreset/ContextLine now live in @adsos/ui (shared across every
+// cluster view); only what stays genuinely tool-view-specific is kept here.
 
 /** Uses the tool's declared scopes (from lib/tools-registry) to ground the
  *  shell in the real TikTok capability it depends on. */
@@ -158,12 +107,38 @@ function ToolTable({ columns, emptyMessage }: { columns: Col[]; emptyMessage: st
   );
 }
 
+/** A ToolTable with a leading row-select column, for tools whose findings
+ *  become bulk actions (waste/winners/losers/budget). Selection state is
+ *  owned by the view; with no rows synced yet the header checkbox stays
+ *  inert and the bar below renders in its idle (0 selected) state. */
+function SelectableToolTable({ columns, emptyMessage }: { columns: Col[]; emptyMessage: string }) {
+  return (
+    <DataGrid>
+      <THead>
+        <TR>
+          <TH className="w-8">
+            <Checkbox checked={false} onCheckedChange={() => {}} disabled aria-label="Select all" />
+          </TH>
+          {columns.map((c) => (
+            <TH key={c.label} numeric={c.numeric}>
+              {c.label}
+            </TH>
+          ))}
+        </TR>
+      </THead>
+      <tbody>
+        <EmptyRow cols={columns.length + 1}>{emptyMessage}</EmptyRow>
+      </tbody>
+    </DataGrid>
+  );
+}
+
 const NO_DATA = 'Connect a TikTok ad account to see live results here.';
 
 // -- Diagnostics ------------------------------------------------------------
 
 function DeliveryDoctorView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   const [reason, setReason] = useState<'all' | 'learning' | 'bid' | 'audience' | 'budget'>('all');
   return (
     <div className="flex flex-col gap-5">
@@ -181,7 +156,7 @@ function DeliveryDoctorView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
         <Segmented
           ariaLabel="Diagnosis reason"
           value={reason}
@@ -219,7 +194,7 @@ function DeliveryDoctorView({ tool }: ToolViewProps) {
 }
 
 function HealthScoreView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -236,7 +211,7 @@ function HealthScoreView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
       <ToolTable
         columns={[
@@ -257,7 +232,7 @@ function HealthScoreView({ tool }: ToolViewProps) {
 }
 
 function BudgetPacingView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -274,8 +249,16 @@ function BudgetPacingView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
+      <TrendChart
+        xKey="day"
+        series={[
+          { key: 'actual', label: 'Actual spend' },
+          { key: 'ideal', label: 'Ideal pace' },
+        ]}
+        emptyLabel="Pacing curve renders once daily spend has synced for the selected range"
+      />
       <ToolTable
         columns={[
           { label: 'Campaign' },
@@ -298,7 +281,7 @@ function BudgetPacingView({ tool }: ToolViewProps) {
 }
 
 function AnomalyInvestigatorView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   const [metric, setMetric] = useState<'all' | 'spend' | 'cpa' | 'ctr' | 'cvr'>('all');
   return (
     <div className="flex flex-col gap-5">
@@ -316,7 +299,7 @@ function AnomalyInvestigatorView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
         <Segmented
           ariaLabel="Metric filter"
           value={metric}
@@ -330,6 +313,14 @@ function AnomalyInvestigatorView({ tool }: ToolViewProps) {
           ]}
         />
       </div>
+      <TrendChart
+        xKey="day"
+        series={[
+          { key: 'actual', label: 'Actual' },
+          { key: 'baseline', label: 'Trailing baseline' },
+        ]}
+        emptyLabel="Baseline vs. actual renders once a trailing window has synced"
+      />
       <ToolTable
         columns={[
           { label: 'Entity' },
@@ -352,7 +343,7 @@ function AnomalyInvestigatorView({ tool }: ToolViewProps) {
 }
 
 function PerformanceChangeView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -369,8 +360,16 @@ function PerformanceChangeView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
+      <TrendChart
+        xKey="day"
+        series={[
+          { key: 'current', label: 'Current period' },
+          { key: 'prior', label: 'Prior period' },
+        ]}
+        emptyLabel="Period-over-period trend renders once two full periods have synced"
+      />
       <ToolTable
         columns={[
           { label: 'Entity' },
@@ -392,7 +391,7 @@ function PerformanceChangeView({ tool }: ToolViewProps) {
 }
 
 function ChangeHistoryView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   const [type, setType] = useState<'all' | 'budget' | 'bid' | 'targeting' | 'status'>('all');
   return (
     <div className="flex flex-col gap-5">
@@ -410,7 +409,7 @@ function ChangeHistoryView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
         <Segmented
           ariaLabel="Change type"
           value={type}
@@ -454,8 +453,9 @@ const SENSITIVITY_OPTIONS: { value: Sensitivity; label: string }[] = [
 ];
 
 function WasteFinderView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   const [sensitivity, setSensitivity] = useState<Sensitivity>('balanced');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -472,10 +472,10 @@ function WasteFinderView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
         <Segmented ariaLabel="Sensitivity" value={sensitivity} onChange={setSensitivity} options={SENSITIVITY_OPTIONS} />
       </div>
-      <ToolTable
+      <SelectableToolTable
         columns={[
           { label: 'Ad group' },
           { label: 'Campaign' },
@@ -488,6 +488,21 @@ function WasteFinderView({ tool }: ToolViewProps) {
         ]}
         emptyMessage={NO_DATA}
       />
+      <BulkActionBar
+        count={selected.size}
+        onClear={() => setSelected(new Set())}
+        actions={
+          <>
+            <Button variant="secondary" size="sm" disabled={selected.size === 0} className="gap-1.5">
+              <Ban className="h-3.5 w-3.5" />
+              Pause selected
+            </Button>
+            <Button variant="destructive" size="sm" disabled={selected.size === 0}>
+              Remove wasted spend
+            </Button>
+          </>
+        }
+      />
       <InsightBanner icon={Recycle} tone="info">
         Waste Finder flags ad groups spending with zero or near-zero conversions, scores each one
         strong / likely / review, and pre-selects the clear cases so cleanup is a shortlist, not a
@@ -498,7 +513,8 @@ function WasteFinderView({ tool }: ToolViewProps) {
 }
 
 function UnderfundedWinnerView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -515,9 +531,9 @@ function UnderfundedWinnerView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
-      <ToolTable
+      <SelectableToolTable
         columns={[
           { label: 'Ad group' },
           { label: 'Campaign' },
@@ -529,6 +545,16 @@ function UnderfundedWinnerView({ tool }: ToolViewProps) {
         ]}
         emptyMessage={NO_DATA}
       />
+      <BulkActionBar
+        count={selected.size}
+        onClear={() => setSelected(new Set())}
+        actions={
+          <Button variant="primary" size="sm" disabled={selected.size === 0} className="gap-1.5">
+            <Wallet className="h-3.5 w-3.5" />
+            Apply suggested budget
+          </Button>
+        }
+      />
       <InsightBanner icon={TrendingUp} tone="info">
         Underfunded Winner looks for ad groups that hit their daily cap repeatedly while holding a
         CPA below the campaign average - evidence there is more efficient volume on the table if
@@ -539,8 +565,9 @@ function UnderfundedWinnerView({ tool }: ToolViewProps) {
 }
 
 function OverspendingLoserView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   const [sensitivity, setSensitivity] = useState<Sensitivity>('balanced');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -557,10 +584,10 @@ function OverspendingLoserView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
         <Segmented ariaLabel="Sensitivity" value={sensitivity} onChange={setSensitivity} options={SENSITIVITY_OPTIONS} />
       </div>
-      <ToolTable
+      <SelectableToolTable
         columns={[
           { label: 'Ad group' },
           { label: 'Campaign' },
@@ -572,6 +599,21 @@ function OverspendingLoserView({ tool }: ToolViewProps) {
         ]}
         emptyMessage={NO_DATA}
       />
+      <BulkActionBar
+        count={selected.size}
+        onClear={() => setSelected(new Set())}
+        actions={
+          <>
+            <Button variant="secondary" size="sm" disabled={selected.size === 0} className="gap-1.5">
+              <Ban className="h-3.5 w-3.5" />
+              Pause selected
+            </Button>
+            <Button variant="destructive" size="sm" disabled={selected.size === 0}>
+              Trim budget
+            </Button>
+          </>
+        }
+      />
       <InsightBanner icon={TrendingDown} tone="info">
         Overspending Loser ranks ad groups by spend that is not converting at an acceptable CPA or
         ROAS, and separates a quick trim from a full pause based on how far off target each one is.
@@ -581,7 +623,8 @@ function OverspendingLoserView({ tool }: ToolViewProps) {
 }
 
 function BudgetReallocatorView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -598,9 +641,9 @@ function BudgetReallocatorView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
-      <ToolTable
+      <SelectableToolTable
         columns={[
           { label: 'From ad group' },
           { label: 'To ad group' },
@@ -610,6 +653,16 @@ function BudgetReallocatorView({ tool }: ToolViewProps) {
           { label: 'Status' },
         ]}
         emptyMessage={NO_DATA}
+      />
+      <BulkActionBar
+        count={selected.size}
+        onClear={() => setSelected(new Set())}
+        actions={
+          <Button variant="primary" size="sm" disabled={selected.size === 0} className="gap-1.5">
+            <ArrowLeftRight className="h-3.5 w-3.5" />
+            Apply reallocation
+          </Button>
+        }
       />
       <InsightBanner icon={ArrowLeftRight} tone="info">
         Budget Reallocator pairs every proposed move with the guardrail it was checked against -
@@ -621,7 +674,7 @@ function BudgetReallocatorView({ tool }: ToolViewProps) {
 }
 
 function AutomationRulesView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   const [trigger, setTrigger] = useState('cpa_above');
   const [action, setAction] = useState('pause_ad_group');
   return (
@@ -640,7 +693,7 @@ function AutomationRulesView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
 
       <ToolTable
@@ -725,7 +778,7 @@ function FieldShell({ label, children }: { label: string; children: ReactNode })
 }
 
 function ConsolidationView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -742,7 +795,7 @@ function ConsolidationView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
       <ToolTable
         columns={[
@@ -767,7 +820,7 @@ function ConsolidationView({ tool }: ToolViewProps) {
 // -- Reporting ----------------------------------------------------------------
 
 function ProfitabilityView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -784,7 +837,7 @@ function ProfitabilityView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
       <ToolTable
         columns={[
@@ -808,7 +861,7 @@ function ProfitabilityView({ tool }: ToolViewProps) {
 }
 
 function CustomReportsView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   const [dimension, setDimension] = useState('campaign');
   const [metric, setMetric] = useState('spend');
   return (
@@ -827,7 +880,7 @@ function CustomReportsView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex flex-wrap items-center gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
         <FieldShell label="Dimension">
           <select
             value={dimension}
@@ -874,7 +927,7 @@ function CustomReportsView({ tool }: ToolViewProps) {
 }
 
 function BenchmarkingView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   const [industry, setIndustry] = useState('ecommerce');
   return (
     <div className="flex flex-col gap-5">
@@ -892,7 +945,7 @@ function BenchmarkingView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex flex-wrap items-center gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
         <FieldShell label="Industry">
           <select
             value={industry}

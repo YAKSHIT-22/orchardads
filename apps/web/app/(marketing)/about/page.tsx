@@ -13,10 +13,10 @@ const WHY_TIKTOK = [
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto flex max-w-[760px] flex-col gap-10 px-6 py-16">
+    <main className="mx-auto flex max-w-3xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">
       <header className="flex flex-col gap-3">
-        <span className="text-label text-iris">About</span>
-        <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] leading-tight text-ink">
+        <span className="font-ui text-[11px] font-semibold uppercase tracking-[0.22em] text-iris/80">About</span>
+        <h1 className="font-display text-4xl leading-tight tracking-[-0.02em] text-ink sm:text-5xl">
           One AI media-buyer for TikTok Ads - and the creators behind the ads.
         </h1>
         <p className="font-ui text-[15px] leading-6 text-ink-muted">
@@ -32,7 +32,7 @@ export default function AboutPage() {
         <h2 className="font-display text-[20px] text-ink">Why TikTok, specifically</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {WHY_TIKTOK.map(([h, b]) => (
-            <div key={h} className="flex flex-col gap-1 rounded-md border border-rule bg-paper p-4">
+            <div key={h} className="flex flex-col gap-1 rounded-2xl border border-rule bg-paper p-4">
               <span className="font-ui text-[13px] font-semibold text-ink">{h}</span>
               <p className="font-ui text-[12px] leading-4 text-ink-muted">{b}</p>
             </div>
@@ -44,7 +44,7 @@ export default function AboutPage() {
         <h2 className="font-display text-[20px] text-ink">What we believe</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {PRINCIPLES.map(([h, b]) => (
-            <div key={h} className="flex flex-col gap-1 rounded-md border border-rule bg-paper p-4">
+            <div key={h} className="flex flex-col gap-1 rounded-2xl border border-rule bg-paper p-4">
               <span className="font-ui text-[13px] font-semibold text-ink">{h}</span>
               <p className="font-ui text-[12px] leading-4 text-ink-muted">{b}</p>
             </div>

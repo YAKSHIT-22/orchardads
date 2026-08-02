@@ -21,7 +21,13 @@ import {
   TH,
   TD,
   EmptyRow,
+  Segmented,
+  DatePreset,
+  ContextLine,
+  Checkbox,
+  BulkActionBar,
   cn,
+  type DateRangeValue,
 } from '@adsos/ui';
 import {
   FlaskConical,
@@ -46,7 +52,6 @@ import {
   Eye,
   EyeOff,
   SquareCheckBig,
-  Square,
   Ban,
   RefreshCw,
   CircleDot,
@@ -54,68 +59,8 @@ import {
 } from 'lucide-react';
 import type { ToolViewMap, ToolViewProps } from './_registry';
 
-// -- Local shell atoms (file-scoped; analytics.tsx keeps its own copy) --
-
-type RangeValue = '7d' | '30d' | '90d';
-const RANGE_OPTIONS: RangeValue[] = ['7d', '30d', '90d'];
-
-function RangeTabs({ value, onChange }: { value: RangeValue; onChange: (v: RangeValue) => void }) {
-  return (
-    <div className="inline-flex rounded-md border border-rule p-0.5" role="tablist" aria-label="Date range">
-      {RANGE_OPTIONS.map((o) => (
-        <button
-          key={o}
-          type="button"
-          role="tab"
-          aria-selected={value === o}
-          onClick={() => onChange(o)}
-          className={cn(
-            'rounded-sm px-3 py-1 font-ui text-[12px] font-medium transition-colors',
-            value === o ? 'bg-iris text-white' : 'text-ink-muted hover:text-ink',
-          )}
-        >
-          {o}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-  ariaLabel,
-}: {
-  options: { value: T; label: string }[];
-  value: T;
-  onChange: (v: T) => void;
-  ariaLabel: string;
-}) {
-  return (
-    <div className="inline-flex rounded-md border border-rule p-0.5" role="tablist" aria-label={ariaLabel}>
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          role="tab"
-          aria-selected={value === o.value}
-          onClick={() => onChange(o.value)}
-          className={cn(
-            'rounded-sm px-3 py-1 font-ui text-[12px] font-medium transition-colors',
-            value === o.value ? 'bg-iris text-white' : 'text-ink-muted hover:text-ink',
-          )}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ContextLine({ children }: { children: ReactNode }) {
-  return <p className="max-w-2xl font-ui text-[13px] text-ink-muted">{children}</p>;
-}
+// -- Local shell atoms --
+// Segmented/DatePreset/ContextLine now live in @adsos/ui; see analytics.tsx.
 
 function ScopesLine({ tool }: { tool: ToolViewProps['tool'] }) {
   if (!tool.scopes || tool.scopes.length === 0) return null;
@@ -480,7 +425,7 @@ function CampaignStudioView({ tool }: ToolViewProps) {
 
 function BulkEditorView({ tool }: ToolViewProps) {
   const [level, setLevel] = useState<'campaign' | 'ad_group' | 'ad'>('ad_group');
-  const [selected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   return (
     <div className="flex flex-col gap-5">
@@ -513,8 +458,8 @@ function BulkEditorView({ tool }: ToolViewProps) {
       <DataGrid>
         <THead>
           <TR>
-            <TH>
-              <Square className="h-3.5 w-3.5 text-ink-faint" aria-label="Select all" />
+            <TH className="w-8">
+              <Checkbox checked={false} onCheckedChange={() => {}} disabled aria-label="Select all" />
             </TH>
             <TH>Name</TH>
             <TH>Campaign</TH>
@@ -533,25 +478,28 @@ function BulkEditorView({ tool }: ToolViewProps) {
         </tbody>
       </DataGrid>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-md border border-rule bg-paper-sunk p-3">
-        <p className="font-ui text-[12px] font-medium text-ink-muted">{selected.size} selected</p>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <Button variant="secondary" size="sm" disabled className="gap-1.5">
-            <RefreshCw className="h-3.5 w-3.5" />
-            Enable
-          </Button>
-          <Button variant="secondary" size="sm" disabled className="gap-1.5">
-            <Ban className="h-3.5 w-3.5" />
-            Pause
-          </Button>
-          <Button variant="secondary" size="sm" disabled>
-            Edit budget
-          </Button>
-          <Button variant="secondary" size="sm" disabled>
-            Edit bid
-          </Button>
-        </div>
-      </div>
+      <BulkActionBar
+        count={selected.size}
+        onClear={() => setSelected(new Set())}
+        actions={
+          <>
+            <Button variant="secondary" size="sm" disabled={selected.size === 0} className="gap-1.5">
+              <RefreshCw className="h-3.5 w-3.5" />
+              Enable
+            </Button>
+            <Button variant="secondary" size="sm" disabled={selected.size === 0} className="gap-1.5">
+              <Ban className="h-3.5 w-3.5" />
+              Pause
+            </Button>
+            <Button variant="secondary" size="sm" disabled={selected.size === 0}>
+              Edit budget
+            </Button>
+            <Button variant="secondary" size="sm" disabled={selected.size === 0}>
+              Edit bid
+            </Button>
+          </>
+        }
+      />
 
       <InsightBanner icon={ListChecks} tone="info">
         The bulk action bar activates once rows are selected and always shows the aggregate spend,
@@ -676,7 +624,7 @@ function LaunchQaView({ tool }: ToolViewProps) {
 // -- Smart+ Comparator: Smart+ vs manual --
 
 function SmartPlusView({ tool }: ToolViewProps) {
-  const [range, setRange] = useState<RangeValue>('30d');
+  const [range, setRange] = useState<DateRangeValue>('30d');
   return (
     <div className="flex flex-col gap-5">
       <ContextLine>
@@ -693,7 +641,7 @@ function SmartPlusView({ tool }: ToolViewProps) {
         ]}
       />
       <div className="flex items-center justify-between gap-3">
-        <RangeTabs value={range} onChange={setRange} />
+        <DatePreset value={range} onChange={setRange} />
       </div>
       <ToolTable
         columns={[

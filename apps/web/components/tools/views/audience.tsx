@@ -3,7 +3,6 @@
 import * as React from 'react';
 import {
   Button,
-  cn,
   DataGrid,
   EmptyRow,
   InsightBanner,
@@ -13,6 +12,11 @@ import {
   THead,
   ToolSection,
   TR,
+  Segmented,
+  SearchInput,
+  SelectField,
+  ContextLine,
+  TrendChart,
 } from '@adsos/ui';
 import {
   Blocks,
@@ -30,73 +34,6 @@ import {
   Waypoints,
 } from 'lucide-react';
 import type { ToolViewMap, ToolViewProps } from './_registry';
-
-/* -- Local shell controls (presentation-only, no data wired yet) -- */
-
-function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: readonly T[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="inline-flex items-center gap-0.5 rounded-md border border-rule bg-paper-sunk p-1">
-      {options.map((opt) => (
-        <button
-          key={opt}
-          type="button"
-          onClick={() => onChange(opt)}
-          aria-pressed={opt === value}
-          className={cn(
-            'rounded-sm px-2.5 py-1 font-ui text-[12px] font-medium transition-colors',
-            opt === value ? 'bg-paper text-ink shadow-sm' : 'text-ink-muted hover:text-ink',
-          )}
-        >
-          {opt}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function SearchInput({ placeholder }: { placeholder: string }) {
-  return (
-    <input
-      type="text"
-      placeholder={placeholder}
-      className="h-[38px] w-56 rounded-md border border-rule bg-paper px-3 font-ui text-[13px] text-ink placeholder:text-ink-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--iris)]"
-    />
-  );
-}
-
-function SelectField({ label, options }: { label: string; options: readonly string[] }) {
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="text-label text-ink-muted">{label}</span>
-      <select className="h-[38px] rounded-md border border-rule bg-paper px-2 font-ui text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--iris)]">
-        {options.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function ContextLine({ children }: { children: React.ReactNode }) {
-  return <p className="max-w-2xl font-ui text-[13px] leading-5 text-ink-muted">{children}</p>;
-}
-
-/** Bordered placeholder for a chart that has no data source yet. */
-function ChartPlaceholder({ label }: { label: string }) {
-  return (
-    <div className="flex h-40 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-rule bg-paper-sunk">
-      <span className="font-ui text-[12px] text-ink-faint">{label}</span>
-    </div>
-  );
-}
 
 /* -- audience-lab (combination) -- */
 
@@ -153,7 +90,14 @@ function AudienceLabView({ tool }: ToolViewProps) {
               <SelectField label="Flight length" options={['1 week', '2 weeks', '4 weeks']} />
               <SelectField label="Budget tier" options={['-', '-', '-']} />
             </div>
-            <ChartPlaceholder label="Predicted reach curve renders once a budget and flight are set" />
+            <TrendChart
+              xKey="week"
+              series={[
+                { key: 'reach', label: 'Cumulative reach' },
+                { key: 'frequency', label: 'Avg frequency' },
+              ]}
+              emptyLabel="Predicted reach curve renders once a budget and flight are set"
+            />
             <DataGrid>
               <THead>
                 <TR>
@@ -308,7 +252,14 @@ function ReachFrequencyView({ tool }: ToolViewProps) {
       </ToolSection>
 
       <ToolSection title="Predicted reach curve" sub="Reach vs. budget for the selected plan">
-        <ChartPlaceholder label="Predicted reach curve renders once a budget and flight are set" />
+        <TrendChart
+              xKey="week"
+              series={[
+                { key: 'reach', label: 'Cumulative reach' },
+                { key: 'frequency', label: 'Avg frequency' },
+              ]}
+              emptyLabel="Predicted reach curve renders once a budget and flight are set"
+            />
       </ToolSection>
 
       <ToolSection title="Scenario comparison">

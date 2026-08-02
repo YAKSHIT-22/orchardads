@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type * as React from 'react';
 import { cn } from '../cn';
+import { Sparkline } from './sparkline';
 
 /**
  * Shared tool-page kit, re-skinned from handyAds' optimize/ui to our tokens.
@@ -8,20 +9,26 @@ import { cn } from '../cn';
  * colour is rationed to state (applied/attention/risk) + the iris "next action".
  */
 
-/** A bordered stat tile: icon chip + label + big data value + sub. */
+export type StatTone = 'neutral' | 'positive' | 'attention' | 'risk' | 'iris';
+
+/** A bordered stat tile: icon chip + label + big data value + sub, with an
+ *  optional inline sparkline (only pass `spark` for a real synced series -
+ *  never fabricate one to fill the empty-state layout). */
 export function StatTile({
   icon: Icon,
   label,
   value,
   sub,
   tone = 'neutral',
+  spark,
   className,
 }: {
   icon?: LucideIcon;
   label: string;
   value: string;
   sub?: string;
-  tone?: 'neutral' | 'positive' | 'attention' | 'risk' | 'iris';
+  tone?: StatTone;
+  spark?: number[];
   className?: string;
 }) {
   const chip = {
@@ -41,8 +48,15 @@ export function StatTile({
           </span>
         )}
       </div>
-      <span className="font-data text-[22px] leading-6 text-ink">{value}</span>
-      {sub && <span className="font-ui text-[11px] text-ink-faint">{sub}</span>}
+      <div className="flex items-end justify-between gap-2">
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="font-data text-[22px] leading-6 text-ink truncate">{value}</span>
+          {sub && <span className="font-ui text-[11px] text-ink-faint truncate">{sub}</span>}
+        </div>
+        {spark && spark.length > 1 && (
+          <Sparkline data={spark} tone={tone === 'neutral' ? 'iris' : tone} />
+        )}
+      </div>
     </div>
   );
 }
@@ -180,3 +194,157 @@ export const CHART = {
   grid: 'var(--rule)',
   axis: 'var(--ink-faint)',
 } as const;
+
+// ── Shared tool-page controls ──
+// Consolidated here so every cluster view (analytics/management/creative/
+// audience/growth) reads from one implementation instead of five drifting
+// file-scoped copies.
+
+type SegOption<T extends string> = T | { value: T; label: string };
+function normalizeSegOption<T extends string>(o: SegOption<T>): { value: T; label: string } {
+  return typeof o === 'string' ? { value: o, label: o } : o;
+}
+
+/** Pill-group control - date presets, sensitivity, segment tabs, anything
+ *  with a small closed set of mutually-exclusive values. */
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+  ariaLabel,
+  className,
+}: {
+  options: readonly SegOption<T>[];
+  value: T;
+  onChange: (v: T) => void;
+  ariaLabel?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn('inline-flex items-center gap-0.5 rounded-md border border-rule bg-paper-sunk p-1', className)}
+      role="tablist"
+      aria-label={ariaLabel}
+    >
+      {options.map((raw) => {
+        const o = normalizeSegOption(raw);
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="tab"
+            aria-selected={value === o.value}
+            onClick={() => onChange(o.value)}
+            className={cn(
+              'rounded-sm px-2.5 py-1 font-ui text-[12px] font-medium transition-colors',
+              value === o.value ? 'bg-paper text-ink shadow-sm' : 'text-ink-muted hover:text-ink',
+            )}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export type DateRangeValue = '7d' | '30d' | '60d' | '90d';
+const DATE_PRESET_OPTIONS: { value: DateRangeValue; label: string }[] = [
+  { value: '7d', label: '7d' },
+  { value: '30d', label: '30d' },
+  { value: '60d', label: '60d' },
+  { value: '90d', label: '90d' },
+];
+
+/** The 7/30/60/90-day range control every tool page opens with. */
+export function DatePreset({
+  value,
+  onChange,
+  options = DATE_PRESET_OPTIONS,
+  className,
+}: {
+  value: DateRangeValue;
+  onChange: (v: DateRangeValue) => void;
+  options?: { value: DateRangeValue; label: string }[];
+  className?: string;
+}) {
+  return <Segmented ariaLabel="Date range" options={options} value={value} onChange={onChange} className={className} />;
+}
+
+export function SearchInput({
+  placeholder,
+  className,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & { placeholder: string }) {
+  return (
+    <input
+      type="text"
+      placeholder={placeholder}
+      className={cn(
+        'h-[38px] w-56 rounded-md border border-rule bg-paper px-3 font-ui text-[13px] text-ink placeholder:text-ink-faint',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--iris)]',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function SelectField({
+  label,
+  options,
+  value,
+  onChange,
+  className,
+}: {
+  label?: string;
+  options: readonly string[];
+  value?: string;
+  onChange?: (v: string) => void;
+  className?: string;
+}) {
+  return (
+    <label className={cn('flex flex-col gap-1', className)}>
+      {label && <span className="text-label text-ink-muted">{label}</span>}
+      <select
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        className="h-[38px] rounded-md border border-rule bg-paper px-2 font-ui text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--iris)]"
+      >
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+/** The one-line description under a tool's ToolHeader. */
+export function ContextLine({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={cn('max-w-2xl font-ui text-[13px] leading-5 text-ink-muted', className)}>{children}</p>;
+}
+
+/** Bordered placeholder for a chart that has no data source yet. Prefer
+ *  TrendChart for an actual time series - reach for this for non-line
+ *  visuals (reach curves, funnels) that stay a stub until wired. */
+export function ChartPlaceholder({
+  label,
+  height = 160,
+  className,
+}: {
+  label: string;
+  height?: number;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'flex flex-col items-center justify-center gap-1 rounded-md border border-dashed border-rule bg-paper-sunk',
+        className,
+      )}
+      style={{ height }}
+    >
+      <span className="font-ui text-[12px] text-ink-faint">{label}</span>
+    </div>
+  );
+}

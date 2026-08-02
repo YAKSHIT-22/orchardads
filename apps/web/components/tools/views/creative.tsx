@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  cn,
   DataGrid,
   EmptyRow,
   InsightBanner,
@@ -15,8 +14,14 @@ import {
   THead,
   ToolSection,
   TR,
+  Segmented,
+  SearchInput,
+  ContextLine,
+  Checkbox,
+  BulkActionBar,
 } from '@adsos/ui';
 import {
+  Ban,
   Clapperboard,
   Clock,
   FileText,
@@ -31,57 +36,13 @@ import {
 } from 'lucide-react';
 import type { ToolViewMap, ToolViewProps } from './_registry';
 
-/* -- Local shell controls (presentation-only, no data wired yet) -- */
-
-function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: readonly T[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="inline-flex items-center gap-0.5 rounded-md border border-rule bg-paper-sunk p-1">
-      {options.map((opt) => (
-        <button
-          key={opt}
-          type="button"
-          onClick={() => onChange(opt)}
-          aria-pressed={opt === value}
-          className={cn(
-            'rounded-sm px-2.5 py-1 font-ui text-[12px] font-medium transition-colors',
-            opt === value ? 'bg-paper text-ink shadow-sm' : 'text-ink-muted hover:text-ink',
-          )}
-        >
-          {opt}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function SearchInput({ placeholder }: { placeholder: string }) {
-  return (
-    <input
-      type="text"
-      placeholder={placeholder}
-      className="h-[38px] w-56 rounded-md border border-rule bg-paper px-3 font-ui text-[13px] text-ink placeholder:text-ink-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--iris)]"
-    />
-  );
-}
-
-function ContextLine({ children }: { children: React.ReactNode }) {
-  return <p className="max-w-2xl font-ui text-[13px] leading-5 text-ink-muted">{children}</p>;
-}
-
 /* -- creative-fatigue -- */
 
 const FATIGUE_TABS = ['All', 'Fatigued', 'Healthy', 'New'] as const;
 
 function CreativeFatigueView({ tool }: ToolViewProps) {
   const [tab, setTab] = React.useState<(typeof FATIGUE_TABS)[number]>('All');
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
   void tool;
   return (
     <div className="flex flex-col gap-6">
@@ -110,6 +71,9 @@ function CreativeFatigueView({ tool }: ToolViewProps) {
         <DataGrid>
           <THead>
             <TR>
+              <TH className="w-8">
+                <Checkbox checked={false} onCheckedChange={() => {}} disabled aria-label="Select all" />
+              </TH>
               <TH>Creative</TH>
               <TH>Ad group</TH>
               <TH numeric>Days live</TH>
@@ -122,13 +86,30 @@ function CreativeFatigueView({ tool }: ToolViewProps) {
             </TR>
           </THead>
           <tbody>
-            <EmptyRow cols={9}>
+            <EmptyRow cols={10}>
               Connect a TikTok Ads account to analyze creative fatigue. Once 7 days of delivery data has
               synced, creatives with declining CTR appear here ranked by decay - about 3 days away for a new
               connection.
             </EmptyRow>
           </tbody>
         </DataGrid>
+        <BulkActionBar
+          count={selected.size}
+          onClear={() => setSelected(new Set())}
+          className="mt-3"
+          actions={
+            <>
+              <Button variant="secondary" size="sm" disabled={selected.size === 0} className="gap-1.5">
+                <Ban className="h-3.5 w-3.5" />
+                Pause selected
+              </Button>
+              <Button variant="primary" size="sm" disabled={selected.size === 0} className="gap-1.5">
+                <Repeat className="h-3.5 w-3.5" />
+                Send to Creative Refresh
+              </Button>
+            </>
+          }
+        />
       </ToolSection>
 
       <InsightBanner icon={ScanSearch} tone="info">

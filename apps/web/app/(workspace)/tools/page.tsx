@@ -40,7 +40,7 @@ function ToolCard({ tool }: { tool: ToolDef }) {
 export default function ToolsPage() {
   const groups = toolsByCategory();
   return (
-    <div className="mx-auto flex max-w-[1120px] flex-col gap-8 px-6 py-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-6 sm:px-10">
       <ToolHeader
         icon={LayoutGrid}
         title="Tools"

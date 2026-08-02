@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
-    <div className="mx-auto flex max-w-[720px] flex-col gap-6 px-6 py-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-6 py-6 sm:px-10">
       <ToolHeader
         icon={Settings}
         title="Settings"

@@ -19,7 +19,7 @@ export default async function AuditPage() {
   const actions = ctx ? await repositories.actions.listRecent(ctx, 100) : [];
 
   return (
-    <div className="mx-auto flex max-w-[900px] flex-col gap-6 px-6 py-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-6 py-6 sm:px-10">
       <ToolHeader
         icon={History}
         title="Activity"
@@ -43,7 +43,7 @@ export default async function AuditPage() {
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <span className="text-label text-ink-muted">
-                        {a.platform} {'·'} {a.entityType} {'·'} {a.kind}
+                        {a.platform} {'-'} {a.entityType} {'-'} {a.kind}
                       </span>
                       <Badge variant={STATUS_VARIANT[a.status] ?? 'neutral'}>{a.status.toLowerCase()}</Badge>
                       <RiskBadge risk={a.riskBand as 'SAFE' | 'LOW' | 'MEDIUM' | 'HIGH'} />

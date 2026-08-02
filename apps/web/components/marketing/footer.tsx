@@ -1,29 +1,37 @@
 import Link from 'next/link';
 
 const COLS: { title: string; links: [string, string][] }[] = [
-  { title: 'Product', links: [['Overview', '/product'], ['Pricing', '/pricing'], ['Onboarding', '/onboarding']] },
+  {
+    title: 'Product',
+    links: [
+      ['Features', '/#features'],
+      ['Product', '/product'],
+      ['Pricing', '/pricing'],
+      ['Get started', '/signup'],
+    ],
+  },
   { title: 'Company', links: [['About', '/about'], ['Contact', '/contact']] },
   { title: 'Creators', links: [['Creator discovery', '/product'], ['Spark Ads', '/product']] },
-  { title: 'Trust', links: [['Action Ledger', '/product'], ['No percentage of spend', '/pricing']] },
+  { title: 'Legal', links: [['Privacy', '/privacy'], ['Terms', '/terms']] },
 ];
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t border-rule bg-paper-sunk">
-      <div className="mx-auto flex max-w-[1120px] flex-col gap-8 px-6 py-12 sm:flex-row sm:justify-between">
-        <div className="flex flex-col gap-2">
+    <footer className="mt-auto w-full border-t border-rule bg-paper-sunk">
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-12 sm:px-10 sm:flex-row sm:justify-between">
+        <div className="flex max-w-xs flex-col gap-3">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-iris font-display text-sm text-white">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-iris font-display text-sm text-white">
               O
             </span>
             <span className="font-display text-[15px] text-ink">OrchardAds</span>
           </div>
-          <p className="max-w-xs font-ui text-[12px] text-ink-muted">
+          <p className="font-ui text-[13px] leading-5 text-ink-muted">
             The AI media-buyer and creator OS for TikTok Ads: diagnostics, safe one-click
             changes, and Spark Ads - without a cut of your spend.
           </p>
           <span
-            className="mt-1 flex w-fit items-center gap-1.5 border-l-[3px] bg-paper px-2 py-0.5"
+            className="flex w-fit items-center gap-1.5 border-l-[3px] bg-paper px-2 py-0.5"
             style={{ borderLeftColor: 'var(--p-tiktok)', borderRadius: 'var(--r-sm)' }}
           >
             <span className="font-data text-[10px] font-medium text-ink-muted">TikTok Ads - Live</span>
@@ -31,10 +39,10 @@ export function MarketingFooter() {
         </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4 sm:gap-10">
           {COLS.map((c) => (
-            <div key={c.title} className="flex flex-col gap-2">
+            <div key={c.title} className="flex flex-col gap-2.5">
               <span className="text-label text-ink-faint">{c.title}</span>
               {c.links.map(([label, href]) => (
-                <Link key={label} href={href} className="font-ui text-[12px] text-ink-muted hover:text-ink">
+                <Link key={label} href={href} className="font-ui text-[13px] text-ink-muted hover:text-ink">
                   {label}
                 </Link>
               ))}
@@ -42,11 +50,12 @@ export function MarketingFooter() {
           ))}
         </div>
       </div>
-      <div className="border-t border-rule">
-        <div className="mx-auto max-w-[1120px] px-6 py-4">
+      <div className="border-t border-rule/60">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-6 sm:flex-row sm:px-10">
           <span className="font-data text-[11px] text-ink-faint">
-            OrchardAds - TikTok Ads optimization and creator OS. Not affiliated with TikTok.
+            (c) {new Date().getFullYear()} OrchardAds. Not affiliated with TikTok.
           </span>
+          <span className="font-data text-[11px] text-ink-faint">Built for TikTok performance marketers.</span>
         </div>
       </div>
     </footer>

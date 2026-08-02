@@ -2,10 +2,10 @@ import { PricingTable } from '@/components/marketing/pricing-table';
 
 export default function PricingPage() {
   return (
-    <main className="mx-auto flex max-w-[1120px] flex-col gap-10 px-6 py-16">
+    <main className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 sm:px-10 sm:py-20">
       <header className="flex flex-col items-center gap-3 text-center">
-        <span className="text-label text-iris">Pricing</span>
-        <h1 className="max-w-[20ch] font-display text-[clamp(1.8rem,4vw,2.6rem)] leading-tight text-ink">
+        <span className="font-ui text-[11px] font-semibold uppercase tracking-[0.22em] text-iris/80">Pricing</span>
+        <h1 className="max-w-[20ch] font-display text-4xl leading-tight tracking-[-0.02em] text-ink sm:text-5xl">
           One simple price. No tax on your spend.
         </h1>
         <p className="max-w-[56ch] font-ui text-[14px] text-ink-muted">
@@ -17,7 +17,7 @@ export default function PricingPage() {
 
       <PricingTable />
 
-      <section className="rounded-lg border border-rule bg-paper-sunk p-6">
+      <section className="rounded-2xl border border-rule bg-paper-sunk p-6 sm:p-8">
         <h2 className="mb-3 font-display text-[18px] text-ink">Why one simple price</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[

@@ -26,7 +26,7 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
   // A tool with a dedicated view owns its whole body (its own header + sections).
   if (View) {
     return (
-      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-6 py-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-6 sm:px-10">
         <ToolHeader icon={Icon} title={tool.name} description={tool.description} />
         <View tool={tool} />
       </div>
@@ -34,7 +34,7 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
   }
 
   return (
-    <div className="mx-auto flex max-w-[900px] flex-col gap-6 px-6 py-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 sm:px-10">
       <ToolHeader icon={Icon} title={tool.name} description={tool.description} />
 
       {tool.status === 'gated' ? (

@@ -13,10 +13,10 @@ const SECTIONS: [string, string][] = [
 
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto flex max-w-[760px] flex-col gap-8 px-6 py-16">
+    <main className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-16 sm:px-10 sm:py-20">
       <header className="flex flex-col gap-2">
-        <span className="text-label text-iris">Legal</span>
-        <h1 className="font-display text-[clamp(1.8rem,4vw,2.4rem)] text-ink">Privacy Policy</h1>
+        <span className="font-ui text-[11px] font-semibold uppercase tracking-[0.22em] text-iris/80">Legal</span>
+        <h1 className="font-display text-4xl tracking-[-0.02em] text-ink sm:text-5xl">Privacy Policy</h1>
         <p className="font-data text-[11px] text-ink-faint">Last updated: 2 August 2026</p>
       </header>
       <div className="flex flex-col gap-6">
