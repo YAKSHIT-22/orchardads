@@ -3,7 +3,8 @@ import Link from 'next/link';
 const COLS: { title: string; links: [string, string][] }[] = [
   { title: 'Product', links: [['Overview', '/product'], ['Pricing', '/pricing'], ['Onboarding', '/onboarding']] },
   { title: 'Company', links: [['About', '/about'], ['Contact', '/contact']] },
-  { title: 'Platforms', links: [['TikTok', '/product']] },
+  { title: 'Creators', links: [['Creator discovery', '/product'], ['Spark Ads', '/product']] },
+  { title: 'Trust', links: [['Action Ledger', '/product'], ['No percentage of spend', '/pricing']] },
 ];
 
 export function MarketingFooter() {
@@ -18,10 +19,17 @@ export function MarketingFooter() {
             <span className="font-display text-[15px] text-ink">OrchardAds</span>
           </div>
           <p className="max-w-xs font-ui text-[12px] text-ink-muted">
-            One AI media-buyer workspace for TikTok Ads.
+            The AI media-buyer and creator OS for TikTok Ads: diagnostics, safe one-click
+            changes, and Spark Ads - without a cut of your spend.
           </p>
+          <span
+            className="mt-1 flex w-fit items-center gap-1.5 border-l-[3px] bg-paper px-2 py-0.5"
+            style={{ borderLeftColor: 'var(--p-tiktok)', borderRadius: 'var(--r-sm)' }}
+          >
+            <span className="font-data text-[10px] font-medium text-ink-muted">TikTok Ads - Live</span>
+          </span>
         </div>
-        <div className="grid grid-cols-3 gap-10">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4 sm:gap-10">
           {COLS.map((c) => (
             <div key={c.title} className="flex flex-col gap-2">
               <span className="text-label text-ink-faint">{c.title}</span>
@@ -37,7 +45,7 @@ export function MarketingFooter() {
       <div className="border-t border-rule">
         <div className="mx-auto max-w-[1120px] px-6 py-4">
           <span className="font-data text-[11px] text-ink-faint">
-            OrchardAds - Emerging Ads Optimization OS. Not affiliated with TikTok.
+            OrchardAds - TikTok Ads optimization and creator OS. Not affiliated with TikTok.
           </span>
         </div>
       </div>

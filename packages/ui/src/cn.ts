@@ -8,8 +8,5 @@ export function cn(...inputs: ClassValue[]): string {
 
 /** Platform identity colour variables - used ONLY in 3px rails and chips. */
 export const PLATFORM_COLOR: Record<string, string> = {
-  REDDIT: 'var(--p-reddit)',
-  SPOTIFY: 'var(--p-spotify)',
-  SNAP: 'var(--p-snap)',
-  PINTEREST: 'var(--p-pinterest)',
+  TIKTOK: 'var(--p-tiktok)',
 };

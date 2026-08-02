@@ -1,4 +1,5 @@
 import { RecLedger } from '@/components/inbox/rec-ledger';
+import { TOOL_VIEWS } from '@/components/tools/views';
 import { getWorkspaceDashboard } from '@/lib/data/platform';
 import { TOOLS, toolBySlug } from '@/lib/tools-registry';
 import { getWorkspaceContext } from '@/lib/session';
@@ -17,9 +18,20 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
   if (!tool) notFound();
 
   const Icon = tool.icon;
+  const View = TOOL_VIEWS[slug];
   const ctx = await getWorkspaceContext();
   const data = tool.status === 'live' && ctx ? await getWorkspaceDashboard(ctx) : null;
   const related = data?.recs.filter((r) => r.tool === slug) ?? [];
+
+  // A tool with a dedicated view owns its whole body (its own header + sections).
+  if (View) {
+    return (
+      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-6 py-6">
+        <ToolHeader icon={Icon} title={tool.name} description={tool.description} />
+        <View tool={tool} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-[900px] flex-col gap-6 px-6 py-6">
